@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apply | Elarix</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="index.html" class="brand"><span class="mark">EL</span> Elarix</a>
+    <nav class="main-nav">
+      <a href="index.html">Home</a>
+      <a href="accounts.html">Accounts &amp; Deposits</a>
+      <a href="cards.html">Cards</a>
+      <a href="loans.html">Loans</a>
+      <a href="insurance.html">Insurance</a>
+      <a href="investments.html">Investments</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section style="padding:16px 0;">
+    <div class="wrap">
+      <div class="section-head section-head--compact">
+        <span class="kicker">Application</span>
+        <h2 id="form-heading">Tell us a bit about yourself</h2>
+        <p>Takes about 2 minutes. We'll text you an OTP to verify your number once submitted.</p>
+      </div>
+
+      <div class="lead-layout">
+        <div class="lead-card-panel" id="lead-card-panel">
+          <div class="info-snapshot" id="lcp-snapshot">
+            <div class="is-icon" id="lcp-icon"></div>
+            <div class="is-stats" id="lcp-stats"></div>
+          </div>
+          <h3 id="lcp-name"></h3>
+          <div class="lcp-rate" id="lcp-tagline"></div>
+          <ul class="perks" id="lcp-perks"></ul>
+        </div>
+
+        <div class="lead-form-col">
+          <div class="form-shell" id="form-shell">
+            <form id="lead-form" novalidate>
+              <div class="field-row">
+                <div class="field">
+                  <label for="first_name">First name <span class="req">*</span></label>
+                  <input type="text" id="first_name" name="first_name" required autocomplete="given-name">
+                </div>
+                <div class="field">
+                  <label for="last_name">Last name <span class="req">*</span></label>
+                  <input type="text" id="last_name" name="last_name" required autocomplete="family-name">
+                </div>
+              </div>
+
+              <div class="field-row">
+                <div class="field">
+                  <label for="mobile_number">Mobile number <span class="req">*</span></label>
+                  <input type="tel" id="mobile_number" name="mobile_number" required pattern="[6-9][0-9]{9}" maxlength="10" placeholder="9876543210" autocomplete="tel-national">
+                  <span class="hint">10 digits, no country code</span>
+                </div>
+                <div class="field">
+                  <label for="email_id">Email <span class="req">*</span></label>
+                  <input type="email" id="email_id" name="email_id" required autocomplete="email">
+                </div>
+              </div>
+
+              <div class="field-row">
+                <div class="field">
+                  <label for="dob">Date of birth <span class="req">*</span></label>
+                  <input type="date" id="dob" name="dob" required max="2008-12-31" min="1945-01-01">
+                </div>
+                <div class="field">
+                  <label for="pan">PAN <span class="req">*</span></label>
+                  <input type="text" id="pan" name="pan" required pattern="[A-Za-z]{5}[0-9]{4}[A-Za-z]{1}" maxlength="10" placeholder="ABCDE1234F" style="text-transform:uppercase;">
+                  <span class="hint">Used for eKYC — never stored in plaintext in production</span>
+                </div>
+              </div>
+
+              <div class="field-row">
+                <div class="field">
+                  <label for="city">City <span class="req">*</span></label>
+                  <select id="city" name="city" required>
+                    <option value="" disabled selected>Select city</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="state">State</label>
+                  <input type="text" id="state" name="state" readonly placeholder="Auto-filled from city">
+                </div>
+              </div>
+
+              <!-- Product-specific fields, injected by PRODUCT_EXTRA_FIELDS -->
+              <div id="extra-fields"></div>
+
+              <div class="consent-row">
+                <input type="checkbox" id="consent" required>
+                <label for="consent">I authorize Elarix to verify my details via eKYC and contact me about this application via SMS, email, or phone.</label>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-block">Submit application →</button>
+            </form>
+          </div>
+
+          <div class="success-panel form-shell" id="success-panel">
+            <div class="check">✓</div>
+            <h2>Application submitted</h2>
+            <p>We've sent an OTP to your mobile number. Your reference ID is below — keep it for tracking.</p>
+            <div class="lead-id-chip" id="success-lead-id">CARDWEB000000</div>
+            <div>
+              <a href="index.html" class="btn btn-dark">Back to Home →</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>© 2026 Elarix — fictional demo site, not a real financial institution</span>
+    <span class="pill">🔧 Built for AEP Web SDK / Adobe Launch testing</span>
+  </div>
+</footer>
+
+<!-- Data Layer Inspector -->
+<div id="dl-inspector">
+  <div class="dl-toggle" id="dl-toggle">
+    <div class="left">
+      <span class="dot"></span>
+      <span class="label">adobeDataLayer</span>
+      <span class="count" id="dl-count">0</span>
+    </div>
+    <span class="chev">▲</span>
+  </div>
+  <div class="dl-body">
+    <div class="dl-hint">Live view of window.adobeDataLayer — every push() call on this page, most recent first.</div>
+    <div id="dl-events"></div>
+  </div>
+</div>
+
+<script src="js/datalayer.js"></script>
+<script src="js/leadform.js"></script>
+<!-- Adobe Launch embed - commented out until this site has its own Launch
+     property. Swap in the real Elarix Launch property embed script once
+     one exists. -->
+<!-- <script src="https://assets.adobedtm.com/REPLACE_WITH_ELARIX_PROPERTY/launch.min.js" async></script> -->
+<script src="js/inspector.js"></script>
+<script>
+  const CATEGORY = "Cards";
+
+  const PRODUCT_META = {
+    "Credit Card": { icon: "💳", tagline: "Rewards on everyday spends, with fee waivers for regular use.",
+      stats: [["₹999", "Joining fee"], ["Waived", "On ₹1L+ spend"]],
+      perks: ["Reward points on every spend", "Fuel surcharge waiver", "Airport lounge access (select cards)"] },
+    "Debit Card": { icon: "🏧", tagline: "Comes free with every savings account, accepted everywhere.",
+      stats: [["Free", "With savings a/c"], ["₹2L", "Accidental cover"]],
+      perks: ["Contactless tap-to-pay", "Free ATM withdrawals (in-network)", "Instant card control via app"] },
+    "Forex Card": { icon: "🌍", tagline: "Load multiple currencies for travel, locked at today's rate.",
+      stats: [["22", "Currencies"], ["0%", "Markup on 1st load"]],
+      perks: ["Zero markup on first load", "Chip & PIN protected", "Reloadable from the app while abroad"] },
+    "Prepaid Card": { icon: "🎁", tagline: "A reloadable card for gifting, budgeting, or controlled spends.",
+      stats: [["₹1L", "Max load limit"], ["Instant", "Issuance"]],
+      perks: ["No credit check required", "Great for gifting or allowances", "Set spend limits per card"] },
+  };
+
+  const PRODUCT_EXTRA_FIELDS = {
+    "Credit Card": [
+      { id: "employment_type", label: "Employment type", type: "select", options: ["Salaried", "Self-Employed", "Self-Employed Professional"] },
+      { id: "monthly_income_inr", label: "Monthly income (₹)", type: "number", min: 15000, step: 1000, placeholder: "50000" },
+    ],
+    "Debit Card": [
+      { id: "linked_account_type", label: "Linked account type", type: "select", options: ["Savings Account", "Salary Account", "Current Account"] },
+    ],
+    "Forex Card": [
+      { id: "destination_country", label: "Destination country", type: "text", placeholder: "United States" },
+      { id: "load_amount_usd", label: "Load amount (USD)", type: "number", min: 100, step: 50, placeholder: "1000" },
+    ],
+    "Prepaid Card": [
+      { id: "preload_amount_inr", label: "Preload amount (₹)", type: "number", min: 500, step: 500, placeholder: "5000" },
+    ],
+  };
+
+  const params = new URLSearchParams(window.location.search);
+  const selectedProduct = PRODUCT_META[params.get("product")] ? params.get("product") : "Credit Card";
+  const meta = PRODUCT_META[selectedProduct];
+  const extraFields = PRODUCT_EXTRA_FIELDS[selectedProduct];
+
+  BankDataLayer.pageView({ page_name: "Lead Submission - " + CATEGORY });
+  BankDataLayer.click(selectedProduct + " - Application Form Opened", { event_type: "application_start" });
+
+  document.getElementById("form-heading").textContent = "Apply for a " + selectedProduct;
+  document.getElementById("lead-card-panel").style.background = "var(--cat-cards)";
+  document.getElementById("lcp-icon").textContent = meta.icon;
+  document.getElementById("lcp-stats").innerHTML = meta.stats.map(function (s) { return '<div class="is-stat"><span class="v">' + s[0] + '</span><span class="l">' + s[1] + '</span></div>'; }).join("");
+  document.getElementById("lcp-name").textContent = selectedProduct;
+  document.getElementById("lcp-tagline").textContent = meta.tagline;
+  document.getElementById("lcp-perks").innerHTML = meta.perks.map(function (p) { return "<li>" + p + "</li>"; }).join("");
+
+  LeadFormHelper.renderExtraFields(document.getElementById("extra-fields"), extraFields);
+
+  const citySelect = document.getElementById("city");
+  LeadFormHelper.populateCityDropdown(citySelect, document.getElementById("state"));
+
+  document.getElementById("lead-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    const form = e.target;
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+
+    const profile = Object.assign({
+      mobile_number: document.getElementById("mobile_number").value.trim(),
+      first_name: document.getElementById("first_name").value.trim(),
+      last_name: document.getElementById("last_name").value.trim(),
+      email_id: document.getElementById("email_id").value.trim(),
+      pan: document.getElementById("pan").value.trim().toUpperCase(),
+      dob: document.getElementById("dob").value,
+      city: document.getElementById("city").value,
+      state: document.getElementById("state").value,
+      card_type: selectedProduct,
+    }, LeadFormHelper.collectValues(extraFields));
+
+    const entry = BankDataLayer.cardApplicationSubmit(profile);
+
+    document.getElementById("success-lead-id").textContent = entry.card.reference_id;
+    document.getElementById("form-shell").style.display = "none";
+    document.getElementById("success-panel").classList.add("is-visible");
+  });
+</script>
+</body>
+</html>

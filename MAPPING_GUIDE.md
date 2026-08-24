@@ -2,13 +2,24 @@
 
 One document, covering every data layer variable this site produces, exactly
 how to pull each one into a Launch Data Element, and which AEP schema field
-it maps to. Read this alongside `js/datalayer.js` (the actual implementation)
-and `README.md` (how to run the site).
+it maps to. Read this alongside `js/datalayer.js` (shared logic) +
+`js/leadform.js` (shared helper for the 4 non-loan lead forms) and
+`README.md` (how to run the site).
 
 **This site's job stops at `window.adobeDataLayer.push(...)`.** ECID
 generation and personalization decisioning are explicitly NOT implemented
-here — see the two callout boxes at the end of this document for why, and
-what Launch/Target need to do instead.
+here — see the callout boxes at the end of this document for why, and what
+Launch/Target need to do instead.
+
+Every catalog category (Accounts & Deposits, Cards, Loans, Insurance,
+Investments) now has the same two-step funnel: a catalog page listing its
+products, and a dedicated lead-capture page (`<category>-lead.html`, or
+`lead.html` for Loans specifically) with a real application form. Submitting
+any of the 5 forms pushes a `*.applicationSubmit`-style event carrying a
+category-specific nested object — `loan`, `account`, `card`, `insurance`, or
+`investment` — built the same way each time: common personal-detail fields
+(name, mobile, email, DOB, PAN, city, state) plus a handful of
+product-specific fields that vary by which product was picked.
 
 ---
 
@@ -18,7 +29,7 @@ Every path below is exactly what to paste into a Launch Data Element's
 **Path** field (Data Element type: **"Data Layer variable value"** if using
 the ACDL extension, or the JS Object path if using Custom Code). One Data
 Element per line — name them however your naming convention prefers; the
-suggested names are in sections 2/3 below if you want them.
+suggested names are in sections 2–7 below if you want them.
 
 **`web` object (present on every event):**
 ```
@@ -58,10 +69,72 @@ loan.application_created_date
 loan.campaign
 ```
 
-**`interest` object (present ONLY on the `bank.registerInterest` event — fired from the 4 info-only pages, not Loans):**
+**`account` object (present ONLY on `bank.accountOpenSubmit` — see section 4 for the per-product extra fields, which vary):**
 ```
-interest.product_name
-interest.category
+account.mobile_number
+account.first_name
+account.last_name
+account.email_id
+account.pan
+account.dob
+account.city
+account.state
+account.country
+account.product_type
+account.reference_id
+account.application_created_date
+account.campaign
+```
+
+**`card` object (present ONLY on `bank.cardApplicationSubmit` — see section 5 for the per-product extra fields):**
+```
+card.mobile_number
+card.first_name
+card.last_name
+card.email_id
+card.pan
+card.dob
+card.city
+card.state
+card.country
+card.card_type
+card.reference_id
+card.application_created_date
+card.campaign
+```
+
+**`insurance` object (present ONLY on `bank.insuranceApplicationSubmit` — see section 6 for the per-product extra fields):**
+```
+insurance.mobile_number
+insurance.first_name
+insurance.last_name
+insurance.email_id
+insurance.pan
+insurance.dob
+insurance.city
+insurance.state
+insurance.country
+insurance.insurance_type
+insurance.reference_id
+insurance.application_created_date
+insurance.campaign
+```
+
+**`investment` object (present ONLY on `bank.investmentApplicationSubmit` — see section 7 for the per-product extra fields):**
+```
+investment.mobile_number
+investment.first_name
+investment.last_name
+investment.email_id
+investment.pan
+investment.dob
+investment.city
+investment.state
+investment.country
+investment.investment_type
+investment.reference_id
+investment.application_created_date
+investment.campaign
 ```
 
 **Top-level (to identify which event fired, if you need it as its own Data Element rather than filtering on the rule trigger):**
@@ -73,49 +146,57 @@ event
 
 ## 1. Events this site pushes
 
-The `loan.*` name prefix predates the non-loan pages and functions as this
-site's general push-event namespace (e.g. `loan.click` fires from every
-page, not just Loans) — it wasn't renamed when Accounts/Cards/Insurance/
-Investments were added, so don't read it as loan-specific.
+The `loan.*` name prefix on the shared events predates the non-loan pages
+and functions as this site's general push-event namespace (e.g. `loan.click`
+fires from every page, not just Loans) — it wasn't renamed when Accounts /
+Cards / Insurance / Investments were added, so don't read it as
+loan-specific. The 4 newer category submits use a `bank.*` prefix instead,
+since they were added as their own named events rather than reusing `click()`.
 
 | `event` name | Fires when | `event_type` value |
 |---|---|---|
-| `loan.pageView` | Every page load, all 8 pages | `page_view` |
-| `loan.click` | Hero CTA buttons on Home; "Know More" toggles and tile hover on all 5 catalog pages (Loans + the 4 info-only pages) | `cta_click` or `product_click` |
-| `loan.productClick` | First hover/view of a product tile on the Loan Products page specifically (Loans uses its own dedicated helper; the 4 info-only pages reuse `loan.click` with `event_type: "product_click"` instead — see above) | `product_click` |
+| `loan.pageView` | Every page load, all 13 pages | `page_view` |
+| `loan.click` | Hero CTA buttons on Home; "Know More" toggles and tile hover on all 5 catalog pages; "Application Form Opened" on all 4 non-loan lead pages (reused with `event_type: "application_start"` instead of a dedicated function — see section 4-7 notes) | `cta_click`, `product_click`, or `application_start` |
+| `loan.productClick` | First hover/view of a product tile on the Loan Products page specifically | `product_click` |
 | `loan.applyClick` | Clicking "Apply Now" on a Loans product tile | `cta_click` |
 | `loan.offerClick` | Reserved for promotional banners/offers (not currently used on any page, but the helper exists — call `BankDataLayer.offerClick(target, loanType)` from any new offer element) | `offer_click` |
 | `loan.bannerClick` | Reserved for a Target-driven banner's CTA (see the Target callout below) | `banner_click` |
 | `loan.applicationStart` | First focus into any field on the Loans lead form | `application_start` |
 | `loan.applicationSubmit` | Loans lead form successfully submitted | `application_submit` |
-| `bank.registerInterest` | Clicking "Register Interest" on a tile on Accounts & Deposits, Cards, Insurance, or Investments (the 4 info-only pages — they have no application form, this is their only lead signal) | `interest_registered` |
+| `bank.accountOpenSubmit` | Accounts & Deposits lead form successfully submitted | `application_submit` |
+| `bank.cardApplicationSubmit` | Cards lead form successfully submitted | `application_submit` |
+| `bank.insuranceApplicationSubmit` | Insurance lead form successfully submitted | `application_submit` |
+| `bank.investmentApplicationSubmit` | Investments lead form successfully submitted | `application_submit` |
 
-Every push has this shape:
+Every push has this shape (only one of `loan`/`account`/`card`/`insurance`/`investment` is ever present on a given event, and only on that category's `*Submit` event):
 ```js
 {
-  event: "loan.pageView",      // one of the 9 names above
+  event: "loan.pageView",      // one of the 11 names above
   web: { ...fields, see section 2 },
-  loan: { ...fields, see section 3 },      // ONLY present on loan.applicationSubmit
-  interest: { ...fields, see section 4 }   // ONLY present on bank.registerInterest
+  loan: { ...fields, see section 3 },         // ONLY on loan.applicationSubmit
+  account: { ...fields, see section 4 },      // ONLY on bank.accountOpenSubmit
+  card: { ...fields, see section 5 },         // ONLY on bank.cardApplicationSubmit
+  insurance: { ...fields, see section 6 },    // ONLY on bank.insuranceApplicationSubmit
+  investment: { ...fields, see section 7 }    // ONLY on bank.investmentApplicationSubmit
 }
 ```
 
 ---
 
-## 2. `web` object → Data Elements → loan behavioral schema
+## 2. `web` object → Data Elements → shared behavioral schema
 
 Create each of these as a Launch **Data Element**, type **"Data Layer variable value"** (if using the ACDL extension) or **"Custom Code"** returning the path (if reading `window.adobeDataLayer` directly). Path shown is relative to the pushed object.
 
 | Data Element name | Path | XDM field (schema column) | Type | Notes |
 |---|---|---|---|---|
-| `DL - Mobile Number` | `web.mobile_number` | `mobile_number` | string | Blank until `application_submit` sets it in `localStorage` for the session — see the identity callout below. |
-| `DL - Application ID` | `web.application_id` | `application_id` | string | Blank until `application_submit`. See placeholder-generator callout below. |
-| `DL - Event Type` | `web.event_type` | `event_type` | string | Drives which Launch rule condition matches — see section 4. |
+| `DL - Mobile Number` | `web.mobile_number` | `mobile_number` | string | Blank until any category's submit sets it in `localStorage` for the session — see the identity callout below. |
+| `DL - Application ID` | `web.application_id` | `application_id` | string | Blank until a submit event. Holds the loan `application_id` or the other categories' `reference_id`, whichever fired most recently — see placeholder-generator callout below. |
+| `DL - Event Type` | `web.event_type` | `event_type` | string | Drives which Launch rule condition matches — see section 8. |
 | `DL - Event Timestamp` | `web.event_timestamp` | `event_timestamp` | string (ISO 8601, `+05:30`) | Business-layer timestamp. The AEP Web SDK will also stamp its own `timestamp` on the XDM event automatically — you likely want both: this one for parity with the demo schema, the SDK's own for the authoritative event time. |
-| `DL - Page Name` | `web.page_name` | `page_name` | string | `"Home"` / `"Accounts & Deposits"` / `"Cards"` / `"Loan Products"` / `"Insurance"` / `"Investments"` / `"Lead Submission"` |
+| `DL - Page Name` | `web.page_name` | `page_name` | string | `"Home"` / `"Accounts & Deposits"` / `"Cards"` / `"Loan Products"` / `"Insurance"` / `"Investments"` / `"Lead Submission"` / `"Lead Submission - Accounts & Deposits"` / `"Lead Submission - Cards"` / `"Lead Submission - Insurance"` / `"Lead Submission - Investments"` |
 | `DL - Page URL` | `web.page_url` | `page_url` | string | Path only (e.g. `/loans.html`), not full origin |
 | `DL - Click Target` | `web.click_target` | `click_target` | string | Human-readable description, e.g. `"Home Loan - Apply Now"` |
-| `DL - Loan Type Browsed` | `web.loan_type_browsed` | `loan_type_browsed` | string (enum) | `Personal Loan` / `Home Loan` / `Car Loan` / `Bike Loan` / `Education Loan` / `Gold Loan` / `Business Loan` / `Loan Against Property` |
+| `DL - Loan Type Browsed` | `web.loan_type_browsed` | `loan_type_browsed` | string (enum) | Only meaningfully populated on Loans pages: `Personal Loan` / `Home Loan` / `Car Loan` / `Bike Loan` / `Education Loan` / `Gold Loan` / `Business Loan` / `Loan Against Property`. Blank on the other 4 categories' events — their product name lives in `click_target` text and in the category object's `*_type` field instead (there's no equivalent `*_type_browsed` field on `web` for them). |
 | `DL - Channel` | `web.channel` | `channel` | string | From `?utm_source=`, or `"Direct"`/`"Organic"` fallback |
 | `DL - Campaign` | `web.campaign` | `campaign` | string | From `?utm_campaign=` |
 
@@ -145,33 +226,145 @@ Only exists on the `loan.applicationSubmit` push. Same approach: one Data Elemen
 | `DL Loan - Tenure (Months)` | `loan.tenure_months` | `tenure_months` | integer | Capped client-side per product: 60 (Personal), 360 (Home), 84 (Car), 48 (Bike), 180 (Education), 36 (Gold), 96 (Business), 240 (Loan Against Property) |
 | `DL Loan - Purpose` | `loan.loan_purpose` | `loan_purpose` | string (enum) | Only collected for `Personal Loan` and `Business Loan` (each with its own option list — see `PURPOSE_OPTIONS` in `lead.html`); empty string for the other 6 products |
 | `DL Loan - Existing EMIs` | `loan.existing_emi_inr` | `existing_emi_inr` | integer | Defaults to `0` if left blank |
-| `DL Loan - Application ID` | `loan.application_id` | `application_id` | string | See placeholder-generator callout below |
+| `DL Loan - Application ID` | `loan.application_id` | `application_id` | string | Placeholder format `LNAPPWEB######` — see placeholder-generator callout below |
 | `DL Loan - Current Stage` | `loan.current_application_stage` | `current_application_stage` | string (enum) | Always `"Stage1_OTP_Verified"` at submission — later stages get updated by your backend/LOS as the applicant progresses, not by this site |
 | `DL Loan - Created Date` | `loan.application_created_date` | `application_created_date` | string (date) | |
 | `DL Loan - Campaign` | `loan.campaign` | `campaign` | string | |
 
 ---
 
-## 4. `interest` object → Data Elements → info-page interest signal
+## 4. `account` object → Data Elements → Accounts & Deposits schema
 
-Only exists on the `bank.registerInterest` push, fired from the 4 info-only
-pages (Accounts & Deposits, Cards, Insurance, Investments). Deliberately
-tiny — these pages have no application form, so there's no PII to capture
-client-side, just a "this visitor wants to be contacted about X" signal.
+Only exists on `bank.accountOpenSubmit`, fired from `accounts-lead.html`. The
+common fields (mobile/name/email/pan/dob/city/state/country/reference_id/
+created_date/campaign) are identical in shape to the `loan` object above —
+only the product-specific fields differ by which of the 5 products was
+selected (`PRODUCT_EXTRA_FIELDS` in `accounts-lead.html`).
 
 | Data Element name | Path | XDM field | Type | Notes |
 |---|---|---|---|---|
-| `DL Interest - Product Name` | `interest.product_name` | `product_name` | string | e.g. `"Fixed Deposit"`, `"Credit Card"`, `"Health Insurance"`, `"Mutual Funds"` |
-| `DL Interest - Category` | `interest.category` | `category` | string (enum) | `Accounts & Deposits` / `Cards` / `Insurance` / `Investments` |
-
-If a real interest-capture flow is ever needed for these products (name +
-mobile number, say), extend `registerInterest()` in `datalayer.js` to
-accept and push that data — the pattern to follow is `applicationSubmit()`
-on the Loans flow, not this event.
+| `DL Account - Mobile Number` | `account.mobile_number` | `mobile_number` | string | |
+| `DL Account - First Name` | `account.first_name` | `first_name` | string | |
+| `DL Account - Last Name` | `account.last_name` | `last_name` | string | |
+| `DL Account - Email` | `account.email_id` | `email_id` | string | |
+| `DL Account - PAN` | `account.pan` | `pan` | string | |
+| `DL Account - DOB` | `account.dob` | `dob` | string (date) | |
+| `DL Account - City` | `account.city` | `city` | string | |
+| `DL Account - State` | `account.state` | `state` | string | |
+| `DL Account - Country` | `account.country` | `country` | string | Always `"India"` |
+| `DL Account - Product Type` | `account.product_type` | `product_type` | string (enum) | `Savings Account` / `Salary Account` / `Current Account` / `Fixed Deposit` / `Recurring Deposit` |
+| `DL Account - Occupation` | `account.occupation` | `occupation` | string (enum) | Savings Account only |
+| `DL Account - Initial Deposit` | `account.initial_deposit_inr` | `initial_deposit_inr` | integer | Savings Account only |
+| `DL Account - Employer Name` | `account.employer_name` | `employer_name` | string | Salary Account only |
+| `DL Account - Monthly Income` | `account.monthly_income_inr` | `monthly_income_inr` | integer | Salary Account only |
+| `DL Account - Business Name` | `account.business_name` | `business_name` | string | Current Account only |
+| `DL Account - GSTIN` | `account.gstin` | `gstin` | string | Current Account only, optional |
+| `DL Account - Deposit Amount` | `account.deposit_amount_inr` | `deposit_amount_inr` | integer | Fixed Deposit only |
+| `DL Account - Tenure (Months)` | `account.tenure_months` | `tenure_months` | integer | Fixed Deposit and Recurring Deposit only |
+| `DL Account - Payout Option` | `account.payout_option` | `payout_option` | string (enum) | Fixed Deposit only |
+| `DL Account - Monthly Installment` | `account.monthly_installment_inr` | `monthly_installment_inr` | integer | Recurring Deposit only |
+| `DL Account - Reference ID` | `account.reference_id` | `reference_id` | string | Placeholder format `ACCWEB######` |
+| `DL Account - Created Date` | `account.application_created_date` | `application_created_date` | string (date) | |
+| `DL Account - Campaign` | `account.campaign` | `campaign` | string | |
 
 ---
 
-## 5. Suggested Launch rule structure
+## 5. `card` object → Data Elements → Cards schema
+
+Only exists on `bank.cardApplicationSubmit`, fired from `cards-lead.html`.
+
+| Data Element name | Path | XDM field | Type | Notes |
+|---|---|---|---|---|
+| `DL Card - Mobile Number` | `card.mobile_number` | `mobile_number` | string | |
+| `DL Card - First Name` | `card.first_name` | `first_name` | string | |
+| `DL Card - Last Name` | `card.last_name` | `last_name` | string | |
+| `DL Card - Email` | `card.email_id` | `email_id` | string | |
+| `DL Card - PAN` | `card.pan` | `pan` | string | |
+| `DL Card - DOB` | `card.dob` | `dob` | string (date) | |
+| `DL Card - City` | `card.city` | `city` | string | |
+| `DL Card - State` | `card.state` | `state` | string | |
+| `DL Card - Country` | `card.country` | `country` | string | Always `"India"` |
+| `DL Card - Card Type` | `card.card_type` | `card_type` | string (enum) | `Credit Card` / `Debit Card` / `Forex Card` / `Prepaid Card` |
+| `DL Card - Employment Type` | `card.employment_type` | `employment_type` | string (enum) | Credit Card only |
+| `DL Card - Monthly Income` | `card.monthly_income_inr` | `monthly_income_inr` | integer | Credit Card only |
+| `DL Card - Linked Account Type` | `card.linked_account_type` | `linked_account_type` | string (enum) | Debit Card only |
+| `DL Card - Destination Country` | `card.destination_country` | `destination_country` | string | Forex Card only |
+| `DL Card - Load Amount (USD)` | `card.load_amount_usd` | `load_amount_usd` | integer | Forex Card only |
+| `DL Card - Preload Amount` | `card.preload_amount_inr` | `preload_amount_inr` | integer | Prepaid Card only |
+| `DL Card - Reference ID` | `card.reference_id` | `reference_id` | string | Placeholder format `CARDWEB######` |
+| `DL Card - Created Date` | `card.application_created_date` | `application_created_date` | string (date) | |
+| `DL Card - Campaign` | `card.campaign` | `campaign` | string | |
+
+---
+
+## 6. `insurance` object → Data Elements → Insurance schema
+
+Only exists on `bank.insuranceApplicationSubmit`, fired from `insurance-lead.html`.
+
+| Data Element name | Path | XDM field | Type | Notes |
+|---|---|---|---|---|
+| `DL Insurance - Mobile Number` | `insurance.mobile_number` | `mobile_number` | string | |
+| `DL Insurance - First Name` | `insurance.first_name` | `first_name` | string | |
+| `DL Insurance - Last Name` | `insurance.last_name` | `last_name` | string | |
+| `DL Insurance - Email` | `insurance.email_id` | `email_id` | string | |
+| `DL Insurance - PAN` | `insurance.pan` | `pan` | string | |
+| `DL Insurance - DOB` | `insurance.dob` | `dob` | string (date) | |
+| `DL Insurance - City` | `insurance.city` | `city` | string | |
+| `DL Insurance - State` | `insurance.state` | `state` | string | |
+| `DL Insurance - Country` | `insurance.country` | `country` | string | Always `"India"` |
+| `DL Insurance - Insurance Type` | `insurance.insurance_type` | `insurance_type` | string (enum) | `Life Insurance` / `Health Insurance` / `Motor Insurance` / `Travel Insurance` |
+| `DL Insurance - Sum Assured` | `insurance.sum_assured_inr` | `sum_assured_inr` | integer | Life Insurance only |
+| `DL Insurance - Policy Term (Years)` | `insurance.policy_term_years` | `policy_term_years` | integer | Life Insurance only |
+| `DL Insurance - Smoker` | `insurance.smoker` | `smoker` | string (enum: `Yes`/`No`) | Life Insurance only |
+| `DL Insurance - Annual Income` | `insurance.annual_income_inr` | `annual_income_inr` | integer | Life Insurance only |
+| `DL Insurance - Sum Insured` | `insurance.sum_insured_inr` | `sum_insured_inr` | integer | Health Insurance only |
+| `DL Insurance - Family Members` | `insurance.family_members_count` | `family_members_count` | integer | Health Insurance only |
+| `DL Insurance - Pre-Existing Condition` | `insurance.pre_existing_condition` | `pre_existing_condition` | string (enum: `Yes`/`No`) | Health Insurance only |
+| `DL Insurance - Vehicle Type` | `insurance.vehicle_type` | `vehicle_type` | string (enum: `Car`/`Bike`) | Motor Insurance only |
+| `DL Insurance - Vehicle Reg. Number` | `insurance.vehicle_registration_number` | `vehicle_registration_number` | string | Motor Insurance only |
+| `DL Insurance - Manufacture Year` | `insurance.vehicle_manufacture_year` | `vehicle_manufacture_year` | integer | Motor Insurance only |
+| `DL Insurance - Destination Country` | `insurance.destination_country` | `destination_country` | string | Travel Insurance only |
+| `DL Insurance - Travel Start Date` | `insurance.travel_start_date` | `travel_start_date` | string (date) | Travel Insurance only |
+| `DL Insurance - Travel End Date` | `insurance.travel_end_date` | `travel_end_date` | string (date) | Travel Insurance only |
+| `DL Insurance - Traveler Count` | `insurance.traveler_count` | `traveler_count` | integer | Travel Insurance only |
+| `DL Insurance - Reference ID` | `insurance.reference_id` | `reference_id` | string | Placeholder format `INSWEB######` |
+| `DL Insurance - Created Date` | `insurance.application_created_date` | `application_created_date` | string (date) | |
+| `DL Insurance - Campaign` | `insurance.campaign` | `campaign` | string | |
+
+---
+
+## 7. `investment` object → Data Elements → Investments schema
+
+Only exists on `bank.investmentApplicationSubmit`, fired from `investments-lead.html`.
+
+| Data Element name | Path | XDM field | Type | Notes |
+|---|---|---|---|---|
+| `DL Investment - Mobile Number` | `investment.mobile_number` | `mobile_number` | string | |
+| `DL Investment - First Name` | `investment.first_name` | `first_name` | string | |
+| `DL Investment - Last Name` | `investment.last_name` | `last_name` | string | |
+| `DL Investment - Email` | `investment.email_id` | `email_id` | string | |
+| `DL Investment - PAN` | `investment.pan` | `pan` | string | |
+| `DL Investment - DOB` | `investment.dob` | `dob` | string (date) | |
+| `DL Investment - City` | `investment.city` | `city` | string | |
+| `DL Investment - State` | `investment.state` | `state` | string | |
+| `DL Investment - Country` | `investment.country` | `country` | string | Always `"India"` |
+| `DL Investment - Investment Type` | `investment.investment_type` | `investment_type` | string (enum) | `Mutual Funds` / `Demat & Trading` / `IPO` / `PPF & NPS` |
+| `DL Investment - Investment Mode` | `investment.investment_mode` | `investment_mode` | string (enum: `SIP (Monthly)`/`Lumpsum`) | Mutual Funds only |
+| `DL Investment - Investment Amount` | `investment.investment_amount_inr` | `investment_amount_inr` | integer | Mutual Funds only |
+| `DL Investment - Risk Appetite` | `investment.risk_appetite` | `risk_appetite` | string (enum) | Mutual Funds only |
+| `DL Investment - Trading Experience` | `investment.trading_experience` | `trading_experience` | string (enum) | Demat & Trading only |
+| `DL Investment - Existing Demat A/c` | `investment.existing_demat_account` | `existing_demat_account` | string (enum: `Yes`/`No`) | Demat & Trading only |
+| `DL Investment - UPI ID` | `investment.upi_id` | `upi_id` | string | IPO only |
+| `DL Investment - Application Amount` | `investment.application_amount_inr` | `application_amount_inr` | integer | IPO only |
+| `DL Investment - Account Type` | `investment.account_type` | `account_type` | string (enum: `PPF`/`NPS`) | PPF & NPS only |
+| `DL Investment - Annual Contribution` | `investment.annual_contribution_inr` | `annual_contribution_inr` | integer | PPF & NPS only |
+| `DL Investment - Reference ID` | `investment.reference_id` | `reference_id` | string | Placeholder format `INVWEB######` |
+| `DL Investment - Created Date` | `investment.application_created_date` | `application_created_date` | string (date) | |
+| `DL Investment - Campaign` | `investment.campaign` | `campaign` | string | |
+
+---
+
+## 8. Suggested Launch rule structure
 
 One rule per event, all using the same trigger pattern:
 
@@ -181,12 +374,14 @@ Event:     Core - Direct Call Rule  (name: matches the "event" string, e.g. "loa
              filtered to Event Name = "loan.pageView"
 Condition: (none needed - the event name match above is the filter)
 Action:    AEP Web SDK > Send Event
-           XDM data: map each Data Element from sections 2/3/4 to its schema field
+           XDM data: map each Data Element from sections 2-7 to its schema field
 ```
 
-Repeat for all 9 event names in section 1. The `loan.applicationSubmit` rule
-is the only one whose action mapping includes the section-3 Data Elements;
-`bank.registerInterest` is the only one that includes the section-4 ones.
+Repeat for all 11 event names in section 1. Each category's `*Submit` rule
+is the only one whose action mapping includes that category's section (3
+for `loan`, 4 for `account`, 5 for `card`, 6 for `insurance`, 7 for
+`investment`) — never map more than one category's Data Elements onto the
+same rule, since only one of those objects is ever present on a given event.
 
 ---
 
@@ -218,7 +413,8 @@ with **zero JavaScript deciding what goes in it**. That's deliberate:
 1. **Audience**: build a Target/AEP audience on the signal this data layer
    already produces — e.g. "has a `loan.applicationSubmit` event in the last
    7 days", or "`loan_type_browsed` equals `Home Loan`" for product-specific
-   personalization.
+   personalization. The same pattern extends to the other 4 categories using
+   their own `*Submit` events (section 1).
 2. **Activity**: author the actual banner content (headline, copy, the
    applicant's name/loan type if you want it dynamic) as a **Target
    activity** using the Visual Experience Composer, targeting the
@@ -236,13 +432,16 @@ The site also ships a **localStorage-based demo fallback** (in
 rewrites the hero and shows the lower banner purely client-side, using
 `BankDataLayer.getLastViewedProduct()` / `getApplicationProfile()` — this
 guarantees the personalization *looks* real in a demo even before a real
-Target activity is built.
+Target activity is built. This fallback is Loans-specific; it hasn't been
+extended to the other 4 categories' submits.
 
-## A note on `application_id`
+## A note on reference IDs (`application_id` / `reference_id`)
 
-`genApplicationId()` in `datalayer.js` produces a placeholder like
-`LNAPPWEB482913` purely so the demo has something schema-shaped to show in
-the inspector panel. In a real implementation this ID would come back from
-your backend/LOS after actually processing the OTP-verified submission —
-not be invented client-side. Swap `genApplicationId()`'s call site for
-whatever your backend returns once one exists.
+`genApplicationId()` (Loans) and `genRefId()` (the other 4 categories, in
+`datalayer.js`) produce placeholders like `LNAPPWEB482913` / `ACCWEB119042`
+purely so the demo has something schema-shaped to show in the inspector
+panel. In a real implementation these IDs would come back from your
+backend (LOS for loans, core banking/CRM for the others) after actually
+processing the OTP-verified submission — not be invented client-side. Swap
+the relevant generator's call site for whatever your backend returns once
+one exists.

@@ -69,9 +69,6 @@
   const CATEGORY = "Cards";
   BankDataLayer.pageView({ page_name: CATEGORY });
 
-  // Info-only catalog - no dedicated application form/schema per product
-  // (unlike Loans). "Register Interest" just logs intent via
-  // BankDataLayer.registerInterest(); see MAPPING_GUIDE.md.
   const PRODUCTS = [
     { name: "Credit Card", icon: "💳", tagline: "Rewards on everyday spends, with fee waivers for regular use.",
       stats: [["₹999", "Joining + annual fee"], ["Waived", "On ₹1L+ spend/year"]],
@@ -108,7 +105,7 @@
       '<div class="card-details">Fees shown are indicative and subject to change. *Terms &amp; conditions apply.</div>' +
       '<div class="btn-row">' +
         '<button class="btn btn-white know-more">Know More →</button>' +
-        '<button class="btn btn-primary interest-btn">Register Interest →</button>' +
+        '<button class="btn btn-primary apply-now" data-product="' + p.name + '">Apply Now →</button>' +
       '</div>';
 
     el.addEventListener("mouseenter", function onFirstHover() {
@@ -121,12 +118,9 @@
       el.querySelector(".card-details").classList.toggle("is-visible");
     });
 
-    el.querySelector(".interest-btn").addEventListener("click", function (e) {
-      BankDataLayer.registerInterest(p.name, CATEGORY);
-      const btn = e.target;
-      btn.textContent = "Interest noted ✓";
-      btn.classList.add("is-registered");
-      btn.disabled = true;
+    el.querySelector(".apply-now").addEventListener("click", function () {
+      BankDataLayer.click(p.name + " - Apply Now", { event_type: "cta_click" });
+      window.location.href = "cards-lead.html?product=" + encodeURIComponent(p.name);
     });
 
     listEl.appendChild(el);

@@ -200,24 +200,44 @@ const BankDataLayer = (function () {
     );
   }
 
-  // Lighter-weight funnel for the non-loan product pages (Accounts &
-  // Deposits, Cards, Insurance, Investments) - these are info-only pages
-  // (no full application form/schema per product, unlike loans), so this
-  // is the one event they push: a lead signal that someone wants to be
-  // contacted about a specific product, without collecting their details
-  // client-side. `category` is the page it fired from, e.g. "Accounts &
-  // Deposits".
-  function registerInterest(productName, category) {
-    return push("bank.registerInterest",
-      { event_type: "interest_registered", click_target: productName + " - Register Interest" },
-      { interest: { product_name: productName, category: category } }
+  // ---- Full lead-capture submit helpers for the other 3 catalog
+  // categories (Accounts & Deposits, Cards, Insurance, Investments) - same
+  // shape/pattern as applicationSubmit() above, just a different nested
+  // object name + event + reference-ID prefix per category. Each one's
+  // `profile` is whatever the calling page's PRODUCT_EXTRA_FIELDS produced
+  // (see accounts-lead.html / cards-lead.html / insurance-lead.html /
+  // investments-lead.html) merged with the common personal-detail fields. ----
+  function genRefId(prefix) {
+    const digits = String(Math.floor(Math.random() * 900000) + 100000);
+    return prefix + digits;
+  }
+  function categorySubmit(eventName, objectKey, refPrefix, profile) {
+    const refId = genRefId(refPrefix);
+    setKnownIdentity(profile.mobile_number, refId);
+    const fullProfile = Object.assign({}, profile, {
+      reference_id: refId,
+      application_created_date: nowIST().slice(0, 10),
+      country: "India",
+    });
+    const attribution = getAttribution();
+    fullProfile.campaign = fullProfile.campaign || attribution.campaign;
+    const extra = {};
+    extra[objectKey] = fullProfile;
+    return push(eventName,
+      { event_type: "application_submit", application_id: refId, click_target: "Submit Application" },
+      extra
     );
   }
+  function accountOpenSubmit(profile) { return categorySubmit("bank.accountOpenSubmit", "account", "ACCWEB", profile); }
+  function cardApplicationSubmit(profile) { return categorySubmit("bank.cardApplicationSubmit", "card", "CARDWEB", profile); }
+  function insuranceApplicationSubmit(profile) { return categorySubmit("bank.insuranceApplicationSubmit", "insurance", "INSWEB", profile); }
+  function investmentApplicationSubmit(profile) { return categorySubmit("bank.investmentApplicationSubmit", "investment", "INVWEB", profile); }
 
   return {
     getOrCreateECID, nowIST, getAttribution, getMobile, getApplicationId, getApplicationProfile,
     getLastViewedProduct, setLastViewedProduct,
     pageView, click, productClick, applyClick, offerClick, bannerClick,
-    applicationStart, applicationSubmit, registerInterest,
+    applicationStart, applicationSubmit,
+    accountOpenSubmit, cardApplicationSubmit, insuranceApplicationSubmit, investmentApplicationSubmit,
   };
 })();

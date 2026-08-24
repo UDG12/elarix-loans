@@ -69,9 +69,6 @@
   const CATEGORY = "Insurance";
   BankDataLayer.pageView({ page_name: CATEGORY });
 
-  // Info-only catalog - no dedicated application form/schema per product
-  // (unlike Loans). "Register Interest" just logs intent via
-  // BankDataLayer.registerInterest(); see MAPPING_GUIDE.md.
   const PRODUCTS = [
     { name: "Life Insurance", icon: "🛡", tagline: "A term plan that protects your family's finances if something happens to you.",
       stats: [["₹1 Cr", "Cover available"], ["₹500/mo", "Premium from"]],
@@ -108,7 +105,7 @@
       '<div class="card-details">Premiums and cover shown are indicative and subject to underwriting. *Terms &amp; conditions apply.</div>' +
       '<div class="btn-row">' +
         '<button class="btn btn-white know-more">Know More →</button>' +
-        '<button class="btn btn-primary interest-btn">Register Interest →</button>' +
+        '<button class="btn btn-primary apply-now" data-product="' + p.name + '">Get Insured →</button>' +
       '</div>';
 
     el.addEventListener("mouseenter", function onFirstHover() {
@@ -121,12 +118,9 @@
       el.querySelector(".card-details").classList.toggle("is-visible");
     });
 
-    el.querySelector(".interest-btn").addEventListener("click", function (e) {
-      BankDataLayer.registerInterest(p.name, CATEGORY);
-      const btn = e.target;
-      btn.textContent = "Interest noted ✓";
-      btn.classList.add("is-registered");
-      btn.disabled = true;
+    el.querySelector(".apply-now").addEventListener("click", function () {
+      BankDataLayer.click(p.name + " - Get Insured", { event_type: "cta_click" });
+      window.location.href = "insurance-lead.html?product=" + encodeURIComponent(p.name);
     });
 
     listEl.appendChild(el);
