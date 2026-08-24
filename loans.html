@@ -23,7 +23,7 @@
     <div class="wrap">
       <div class="section-head" id="compare">
         <span class="kicker">Loan Products</span>
-        <h2>Four products, one application flow</h2>
+        <h2>Eight products, one application flow</h2>
         <p>Every loan ships with instant eKYC and same-day in-principle approval. Pick the product that matches your need — you can always add on later from the app.</p>
       </div>
 
@@ -82,6 +82,18 @@
     { name: "Bike Loan", icon: "🏍", color: "var(--loan-bike)", bg: "linear-gradient(135deg, #9C5B12, #2E1904)", rate: "11.25% p.a. onwards", rateShort: "11.25%",
       maxAmount: "Up to ₹3 Lakhs", tenure: "Up to 48 months", bar: 13, badge: "Minimal docs", fee: "Flat ₹999",
       perks: [["🔋", "Funding for EVs & premium bikes"], ["📄", "Minimal documentation"], ["⚡", "Instant approval for salaried applicants"]] },
+    { name: "Education Loan", icon: "🎓", color: "var(--loan-education)", bg: "linear-gradient(135deg, #2C6E8C, #0B2530)", rate: "8.10% p.a. onwards", rateShort: "8.10%",
+      maxAmount: "Up to ₹75 Lakhs", tenure: "Up to 15 years", bar: 50, badge: "Nil fee up to ₹20L", fee: "Nil up to ₹20L, ₹10,000 above",
+      perks: [["📚", "Covers tuition, hostel & travel costs"], ["⏳", "Moratorium until course completion + 6 months"], ["💰", "Tax benefits under Sec 80E"]] },
+    { name: "Gold Loan", icon: "🪙", color: "var(--loan-gold)", bg: "linear-gradient(135deg, #8A6D1F, #2E2408)", rate: "8.75% p.a. onwards", rateShort: "8.75%",
+      maxAmount: "Up to ₹50 Lakhs", tenure: "Up to 36 months", bar: 10, badge: "30-min disbursal", fee: "Up to 0.5%",
+      perks: [["⏱", "Disbursal within 30 minutes"], ["💍", "Loan against pledged gold jewellery"], ["↩", "Flexible bullet repayment option"]] },
+    { name: "Business Loan", icon: "💼", color: "var(--loan-business)", bg: "linear-gradient(135deg, #6B4C9A, #221533)", rate: "14.00% p.a. onwards", rateShort: "14.00%",
+      maxAmount: "Up to ₹80 Lakhs", tenure: "Up to 8 years", bar: 27, badge: "Collateral-free", fee: "Up to 2%",
+      perks: [["🏦", "Collateral-free funding up to ₹50L"], ["📋", "GST & Udyam registration accepted"], ["💳", "Overdraft facility available"]] },
+    { name: "Loan Against Property", icon: "🏢", color: "var(--loan-lap)", bg: "linear-gradient(135deg, #2F5D6B, #0E2126)", rate: "9.00% p.a. onwards", rateShort: "9.00%",
+      maxAmount: "Up to ₹5 Crore", tenure: "Up to 20 years", bar: 67, badge: "Big-ticket funding", fee: "Up to 1%",
+      perks: [["🏠", "Unlock funds against owned property"], ["🎯", "Use for business or personal needs"], ["📅", "Longer tenure than unsecured loans"]] },
   ];
 
   const listEl = document.getElementById("card-list");

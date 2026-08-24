@@ -128,14 +128,9 @@
               <div class="field-row" id="purpose-row" style="display:none;">
                 <div class="field">
                   <label for="loan_purpose">Purpose of loan <span class="req">*</span></label>
+                  <!-- options are swapped in per loan type by PURPOSE_OPTIONS below -->
                   <select id="loan_purpose" name="loan_purpose">
                     <option value="" disabled selected>Select purpose</option>
-                    <option value="Medical Emergency">Medical Emergency</option>
-                    <option value="Wedding">Wedding</option>
-                    <option value="Travel">Travel</option>
-                    <option value="Home Renovation">Home Renovation</option>
-                    <option value="Debt Consolidation">Debt Consolidation</option>
-                    <option value="Other">Other</option>
                   </select>
                 </div>
                 <div class="field">
@@ -236,6 +231,25 @@
     "Bike Loan": { icon: "🏍", rate: "11.25% p.a. onwards", rateShort: "11.25%", bg: "linear-gradient(135deg, #9C5B12, #2E1904)",
       tenureText: "Tenure up to 48 months", maxTenureMonths: 48, bar: 13, amount: "Up to ₹3L", badge: "Minimal docs",
       perks: ["Funding for EVs & premium bikes", "Minimal documentation", "Instant approval for salaried applicants"] },
+    "Education Loan": { icon: "🎓", rate: "8.10% p.a. onwards", rateShort: "8.10%", bg: "linear-gradient(135deg, #2C6E8C, #0B2530)",
+      tenureText: "Tenure up to 15 years", maxTenureMonths: 180, bar: 50, amount: "Up to ₹75L", badge: "Nil fee up to ₹20L",
+      perks: ["Covers tuition, hostel & travel costs", "Moratorium until course completion + 6 months", "Tax benefits under Sec 80E"] },
+    "Gold Loan": { icon: "🪙", rate: "8.75% p.a. onwards", rateShort: "8.75%", bg: "linear-gradient(135deg, #8A6D1F, #2E2408)",
+      tenureText: "Tenure up to 36 months", maxTenureMonths: 36, bar: 10, amount: "Up to ₹50L", badge: "30-min disbursal",
+      perks: ["Disbursal within 30 minutes", "Loan against pledged gold jewellery", "Flexible bullet repayment option"] },
+    "Business Loan": { icon: "💼", rate: "14.00% p.a. onwards", rateShort: "14.00%", bg: "linear-gradient(135deg, #6B4C9A, #221533)",
+      tenureText: "Tenure up to 8 years", maxTenureMonths: 96, bar: 27, amount: "Up to ₹80L", badge: "Collateral-free",
+      perks: ["Collateral-free funding up to ₹50L", "GST & Udyam registration accepted", "Overdraft facility available"] },
+    "Loan Against Property": { icon: "🏢", rate: "9.00% p.a. onwards", rateShort: "9.00%", bg: "linear-gradient(135deg, #2F5D6B, #0E2126)",
+      tenureText: "Tenure up to 20 years", maxTenureMonths: 240, bar: 67, amount: "Up to ₹5Cr", badge: "Big-ticket funding",
+      perks: ["Unlock funds against owned property", "Use for business or personal needs", "Longer tenure than unsecured loans"] },
+  };
+  // Purpose dropdown options vary by loan type - only Personal and Business
+  // Loans collect a purpose (unsecured products where intent matters for
+  // underwriting); the other 6 products don't show this field at all.
+  const PURPOSE_OPTIONS = {
+    "Personal Loan": ["Medical Emergency", "Wedding", "Travel", "Home Renovation", "Debt Consolidation", "Other"],
+    "Business Loan": ["Working Capital", "Equipment Purchase", "Business Expansion", "Inventory Purchase", "Debt Refinancing", "Other"],
   };
 
   const params = new URLSearchParams(window.location.search);
@@ -270,10 +284,14 @@
   tenureInput.max = details.maxTenureMonths;
   document.getElementById("tenure-hint").textContent = details.tenureText;
 
-  // Purpose/existing-EMI row only makes sense for unsecured Personal Loans.
-  if (selectedLoan === "Personal Loan") {
+  // Purpose/existing-EMI row only makes sense where intent matters for
+  // underwriting (Personal, Business); options are swapped in per loan type.
+  if (PURPOSE_OPTIONS[selectedLoan]) {
     document.getElementById("purpose-row").style.display = "";
-    document.getElementById("loan_purpose").required = true;
+    const purposeSelect = document.getElementById("loan_purpose");
+    purposeSelect.required = true;
+    purposeSelect.innerHTML = '<option value="" disabled selected>Select purpose</option>' +
+      PURPOSE_OPTIONS[selectedLoan].map(function (p) { return '<option value="' + p + '">' + p + '</option>'; }).join("");
   }
 
   // Populate city dropdown
@@ -320,7 +338,7 @@
       loan_type: selectedLoan,
       loan_amount_requested: Number(document.getElementById("loan_amount_requested").value),
       tenure_months: Number(document.getElementById("tenure_months").value),
-      loan_purpose: selectedLoan === "Personal Loan" ? document.getElementById("loan_purpose").value : "",
+      loan_purpose: PURPOSE_OPTIONS[selectedLoan] ? document.getElementById("loan_purpose").value : "",
       existing_emi_inr: Number(document.getElementById("existing_emi_inr").value) || 0,
     };
 

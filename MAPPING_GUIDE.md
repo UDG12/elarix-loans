@@ -102,7 +102,7 @@ Create each of these as a Launch **Data Element**, type **"Data Layer variable v
 | `DL - Page Name` | `web.page_name` | `page_name` | string | `"Home"` / `"Loan Products"` / `"Lead Submission"` |
 | `DL - Page URL` | `web.page_url` | `page_url` | string | Path only (e.g. `/loans.html`), not full origin |
 | `DL - Click Target` | `web.click_target` | `click_target` | string | Human-readable description, e.g. `"Home Loan - Apply Now"` |
-| `DL - Loan Type Browsed` | `web.loan_type_browsed` | `loan_type_browsed` | string (enum) | `Personal Loan` / `Home Loan` / `Car Loan` / `Bike Loan` |
+| `DL - Loan Type Browsed` | `web.loan_type_browsed` | `loan_type_browsed` | string (enum) | `Personal Loan` / `Home Loan` / `Car Loan` / `Bike Loan` / `Education Loan` / `Gold Loan` / `Business Loan` / `Loan Against Property` |
 | `DL - Channel` | `web.channel` | `channel` | string | From `?utm_source=`, or `"Direct"`/`"Organic"` fallback |
 | `DL - Campaign` | `web.campaign` | `campaign` | string | From `?utm_campaign=` |
 
@@ -129,8 +129,8 @@ Only exists on the `loan.applicationSubmit` push. Same approach: one Data Elemen
 | `DL Loan - Monthly Income` | `loan.monthly_income_inr` | `monthly_income_inr` | integer | |
 | `DL Loan - Loan Type` | `loan.loan_type` | `loan_type` | string (enum) | e.g. `"Home Loan"` |
 | `DL Loan - Amount Requested` | `loan.loan_amount_requested` | `loan_amount_requested` | integer | |
-| `DL Loan - Tenure (Months)` | `loan.tenure_months` | `tenure_months` | integer | Capped client-side per product (60 for Personal, 360 for Home, 84 for Car, 48 for Bike) |
-| `DL Loan - Purpose` | `loan.loan_purpose` | `loan_purpose` | string (enum) | Only collected for `Personal Loan`; empty string for the other 3 products |
+| `DL Loan - Tenure (Months)` | `loan.tenure_months` | `tenure_months` | integer | Capped client-side per product: 60 (Personal), 360 (Home), 84 (Car), 48 (Bike), 180 (Education), 36 (Gold), 96 (Business), 240 (Loan Against Property) |
+| `DL Loan - Purpose` | `loan.loan_purpose` | `loan_purpose` | string (enum) | Only collected for `Personal Loan` and `Business Loan` (each with its own option list — see `PURPOSE_OPTIONS` in `lead.html`); empty string for the other 6 products |
 | `DL Loan - Existing EMIs` | `loan.existing_emi_inr` | `existing_emi_inr` | integer | Defaults to `0` if left blank |
 | `DL Loan - Application ID` | `loan.application_id` | `application_id` | string | See placeholder-generator callout below |
 | `DL Loan - Current Stage` | `loan.current_application_stage` | `current_application_stage` | string (enum) | Always `"Stage1_OTP_Verified"` at submission — later stages get updated by your backend/LOS as the applicant progresses, not by this site |

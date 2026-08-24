@@ -28,7 +28,7 @@ browsers block `localStorage` on `file://` origins, so a local server is safer.)
 | Page | File | Purpose |
 |---|---|---|
 | Home | `index.html` | Landing page. Has an empty Target personalization zone — see `MAPPING_GUIDE.md`. |
-| Loan Products | `loans.html` | All 4 loan products (Personal, Home, Car, Bike). Clicking "Apply Now" carries the chosen product into the lead form. |
+| Loan Products | `loans.html` | All 8 loan products (Personal, Home, Car, Bike, Education, Gold, Business, Loan Against Property). Clicking "Apply Now" carries the chosen product into the lead form. |
 | Apply | `lead.html` | The application form. Submitting it fires `application_submit`. |
 
 ## What this site does and doesn't do
