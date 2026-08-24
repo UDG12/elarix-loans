@@ -58,6 +58,12 @@ loan.application_created_date
 loan.campaign
 ```
 
+**`interest` object (present ONLY on the `bank.registerInterest` event — fired from the 4 info-only pages, not Loans):**
+```
+interest.product_name
+interest.category
+```
+
 **Top-level (to identify which event fired, if you need it as its own Data Element rather than filtering on the rule trigger):**
 ```
 event
@@ -67,23 +73,30 @@ event
 
 ## 1. Events this site pushes
 
+The `loan.*` name prefix predates the non-loan pages and functions as this
+site's general push-event namespace (e.g. `loan.click` fires from every
+page, not just Loans) — it wasn't renamed when Accounts/Cards/Insurance/
+Investments were added, so don't read it as loan-specific.
+
 | `event` name | Fires when | `event_type` value |
 |---|---|---|
-| `loan.pageView` | Every page load, all 3 pages | `page_view` |
-| `loan.click` | Hero CTA buttons on Home | `cta_click` |
-| `loan.productClick` | First hover/view of a product tile on Loan Products page | `product_click` |
-| `loan.applyClick` | Clicking "Apply Now" on a product tile | `cta_click` |
+| `loan.pageView` | Every page load, all 8 pages | `page_view` |
+| `loan.click` | Hero CTA buttons on Home; "Know More" toggles and tile hover on all 5 catalog pages (Loans + the 4 info-only pages) | `cta_click` or `product_click` |
+| `loan.productClick` | First hover/view of a product tile on the Loan Products page specifically (Loans uses its own dedicated helper; the 4 info-only pages reuse `loan.click` with `event_type: "product_click"` instead — see above) | `product_click` |
+| `loan.applyClick` | Clicking "Apply Now" on a Loans product tile | `cta_click` |
 | `loan.offerClick` | Reserved for promotional banners/offers (not currently used on any page, but the helper exists — call `BankDataLayer.offerClick(target, loanType)` from any new offer element) | `offer_click` |
 | `loan.bannerClick` | Reserved for a Target-driven banner's CTA (see the Target callout below) | `banner_click` |
-| `loan.applicationStart` | First focus into any field on the lead form | `application_start` |
-| `loan.applicationSubmit` | Lead form successfully submitted | `application_submit` |
+| `loan.applicationStart` | First focus into any field on the Loans lead form | `application_start` |
+| `loan.applicationSubmit` | Loans lead form successfully submitted | `application_submit` |
+| `bank.registerInterest` | Clicking "Register Interest" on a tile on Accounts & Deposits, Cards, Insurance, or Investments (the 4 info-only pages — they have no application form, this is their only lead signal) | `interest_registered` |
 
 Every push has this shape:
 ```js
 {
-  event: "loan.pageView",      // one of the 8 names above
+  event: "loan.pageView",      // one of the 9 names above
   web: { ...fields, see section 2 },
-  loan: { ...fields, see section 3 }   // ONLY present on loan.applicationSubmit
+  loan: { ...fields, see section 3 },      // ONLY present on loan.applicationSubmit
+  interest: { ...fields, see section 4 }   // ONLY present on bank.registerInterest
 }
 ```
 
@@ -99,7 +112,7 @@ Create each of these as a Launch **Data Element**, type **"Data Layer variable v
 | `DL - Application ID` | `web.application_id` | `application_id` | string | Blank until `application_submit`. See placeholder-generator callout below. |
 | `DL - Event Type` | `web.event_type` | `event_type` | string | Drives which Launch rule condition matches — see section 4. |
 | `DL - Event Timestamp` | `web.event_timestamp` | `event_timestamp` | string (ISO 8601, `+05:30`) | Business-layer timestamp. The AEP Web SDK will also stamp its own `timestamp` on the XDM event automatically — you likely want both: this one for parity with the demo schema, the SDK's own for the authoritative event time. |
-| `DL - Page Name` | `web.page_name` | `page_name` | string | `"Home"` / `"Loan Products"` / `"Lead Submission"` |
+| `DL - Page Name` | `web.page_name` | `page_name` | string | `"Home"` / `"Accounts & Deposits"` / `"Cards"` / `"Loan Products"` / `"Insurance"` / `"Investments"` / `"Lead Submission"` |
 | `DL - Page URL` | `web.page_url` | `page_url` | string | Path only (e.g. `/loans.html`), not full origin |
 | `DL - Click Target` | `web.click_target` | `click_target` | string | Human-readable description, e.g. `"Home Loan - Apply Now"` |
 | `DL - Loan Type Browsed` | `web.loan_type_browsed` | `loan_type_browsed` | string (enum) | `Personal Loan` / `Home Loan` / `Car Loan` / `Bike Loan` / `Education Loan` / `Gold Loan` / `Business Loan` / `Loan Against Property` |
@@ -139,7 +152,26 @@ Only exists on the `loan.applicationSubmit` push. Same approach: one Data Elemen
 
 ---
 
-## 4. Suggested Launch rule structure
+## 4. `interest` object → Data Elements → info-page interest signal
+
+Only exists on the `bank.registerInterest` push, fired from the 4 info-only
+pages (Accounts & Deposits, Cards, Insurance, Investments). Deliberately
+tiny — these pages have no application form, so there's no PII to capture
+client-side, just a "this visitor wants to be contacted about X" signal.
+
+| Data Element name | Path | XDM field | Type | Notes |
+|---|---|---|---|---|
+| `DL Interest - Product Name` | `interest.product_name` | `product_name` | string | e.g. `"Fixed Deposit"`, `"Credit Card"`, `"Health Insurance"`, `"Mutual Funds"` |
+| `DL Interest - Category` | `interest.category` | `category` | string (enum) | `Accounts & Deposits` / `Cards` / `Insurance` / `Investments` |
+
+If a real interest-capture flow is ever needed for these products (name +
+mobile number, say), extend `registerInterest()` in `datalayer.js` to
+accept and push that data — the pattern to follow is `applicationSubmit()`
+on the Loans flow, not this event.
+
+---
+
+## 5. Suggested Launch rule structure
 
 One rule per event, all using the same trigger pattern:
 
@@ -149,11 +181,12 @@ Event:     Core - Direct Call Rule  (name: matches the "event" string, e.g. "loa
              filtered to Event Name = "loan.pageView"
 Condition: (none needed - the event name match above is the filter)
 Action:    AEP Web SDK > Send Event
-           XDM data: map each Data Element from sections 2/3 to its schema field
+           XDM data: map each Data Element from sections 2/3/4 to its schema field
 ```
 
-Repeat for all 8 event names in section 1. The `loan.applicationSubmit` rule is
-the only one whose action mapping includes the section-3 Data Elements.
+Repeat for all 9 event names in section 1. The `loan.applicationSubmit` rule
+is the only one whose action mapping includes the section-3 Data Elements;
+`bank.registerInterest` is the only one that includes the section-4 ones.
 
 ---
 

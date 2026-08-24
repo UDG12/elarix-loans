@@ -200,10 +200,24 @@ const BankDataLayer = (function () {
     );
   }
 
+  // Lighter-weight funnel for the non-loan product pages (Accounts &
+  // Deposits, Cards, Insurance, Investments) - these are info-only pages
+  // (no full application form/schema per product, unlike loans), so this
+  // is the one event they push: a lead signal that someone wants to be
+  // contacted about a specific product, without collecting their details
+  // client-side. `category` is the page it fired from, e.g. "Accounts &
+  // Deposits".
+  function registerInterest(productName, category) {
+    return push("bank.registerInterest",
+      { event_type: "interest_registered", click_target: productName + " - Register Interest" },
+      { interest: { product_name: productName, category: category } }
+    );
+  }
+
   return {
     getOrCreateECID, nowIST, getAttribution, getMobile, getApplicationId, getApplicationProfile,
     getLastViewedProduct, setLastViewedProduct,
     pageView, click, productClick, applyClick, offerClick, bannerClick,
-    applicationStart, applicationSubmit,
+    applicationStart, applicationSubmit, registerInterest,
   };
 })();

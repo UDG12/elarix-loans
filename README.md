@@ -1,9 +1,13 @@
 # Elarix — Demo Website for Adobe Launch / AEP Web SDK Testing
 
-A 3-page test site for a fictional bank, Elarix, that produces real,
-in-browser behavioral and lead data for a loans (Personal / Home / Car /
-Bike) funnel, in a shape built to be 1:1 mapped onto an AEP schema. Built
-so you can validate an Adobe Launch → AEP Web SDK → Adobe Target
+A test site for a fictional bank, Elarix, covering the full HDFC-Bank-style
+product taxonomy (Accounts & Deposits, Cards, Loans, Insurance,
+Investments). The **Loans** section is the one deep, fully-tested funnel —
+8 products with a real lead-capture application form — and produces
+behavioral + lead data in a shape built to be 1:1 mapped onto an AEP
+schema. The other 4 sections are lighter, info-only catalog pages (no
+per-product application form) with a single "Register Interest" signal.
+Built so you can validate an Adobe Launch → AEP Web SDK → Adobe Target
 implementation end-to-end before pointing it at production traffic.
 
 **For the field-by-field Launch Data Element mapping, read `MAPPING_GUIDE.md`
@@ -23,13 +27,17 @@ Then open `http://localhost:8080/index.html`. (Any static file server works.
 Opening the HTML files directly via `file://` mostly works too, but some
 browsers block `localStorage` on `file://` origins, so a local server is safer.)
 
-## The 3 pages
+## The pages
 
 | Page | File | Purpose |
 |---|---|---|
 | Home | `index.html` | Landing page. Has an empty Target personalization zone — see `MAPPING_GUIDE.md`. |
-| Loan Products | `loans.html` | All 8 loan products (Personal, Home, Car, Bike, Education, Gold, Business, Loan Against Property). Clicking "Apply Now" carries the chosen product into the lead form. |
-| Apply | `lead.html` | The application form. Submitting it fires `application_submit`. |
+| Accounts & Deposits | `accounts.html` | Savings, Salary, Current accounts + Fixed/Recurring Deposits. Info-only — "Register Interest" fires `bank.registerInterest`. |
+| Cards | `cards.html` | Credit, Debit, Forex, Prepaid cards. Info-only, same "Register Interest" pattern. |
+| Loans | `loans.html` | All 8 loan products (Personal, Home, Car, Bike, Education, Gold, Business, Loan Against Property). Clicking "Apply Now" carries the chosen product into the lead form — the site's one full application flow. |
+| Insurance | `insurance.html` | Life, Health, Motor, Travel insurance. Info-only. |
+| Investments | `investments.html` | Mutual Funds, Demat & Trading, IPO, PPF & NPS. Info-only. |
+| Apply | `lead.html` | The Loans application form. Submitting it fires `application_submit`. |
 
 ## What this site does and doesn't do
 

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Insurance | Elarix</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="index.html" class="brand"><span class="mark">EL</span> Elarix</a>
+    <nav class="main-nav">
+      <a href="index.html">Home</a>
+      <a href="accounts.html">Accounts &amp; Deposits</a>
+      <a href="cards.html">Cards</a>
+      <a href="loans.html">Loans</a>
+      <a href="insurance.html" class="active">Insurance</a>
+      <a href="investments.html">Investments</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section style="padding-top:52px;padding-bottom:12px;">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="kicker">Insurance</span>
+        <h2>Cover for what matters most</h2>
+        <p>Life, health, motor, and travel cover — pick what fits, and our team will reach out with the next steps.</p>
+      </div>
+
+      <div class="card-list" id="card-list"><!-- populated by JS --></div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>© 2026 Elarix — fictional demo site, not a real financial institution</span>
+    <span class="pill">🔧 Built for AEP Web SDK / Adobe Launch testing</span>
+  </div>
+</footer>
+
+<!-- Data Layer Inspector -->
+<div id="dl-inspector">
+  <div class="dl-toggle" id="dl-toggle">
+    <div class="left">
+      <span class="dot"></span>
+      <span class="label">adobeDataLayer</span>
+      <span class="count" id="dl-count">0</span>
+    </div>
+    <span class="chev">▲</span>
+  </div>
+  <div class="dl-body">
+    <div class="dl-hint">Live view of window.adobeDataLayer — every push() call on this page, most recent first.</div>
+    <div id="dl-events"></div>
+  </div>
+</div>
+
+<script src="js/datalayer.js"></script>
+<!-- Adobe Launch embed - commented out until this site has its own Launch
+     property. Swap in the real Elarix Launch property embed script once
+     one exists. -->
+<!-- <script src="https://assets.adobedtm.com/REPLACE_WITH_ELARIX_PROPERTY/launch.min.js" async></script> -->
+<script src="js/inspector.js"></script>
+<script>
+  const CATEGORY = "Insurance";
+  BankDataLayer.pageView({ page_name: CATEGORY });
+
+  // Info-only catalog - no dedicated application form/schema per product
+  // (unlike Loans). "Register Interest" just logs intent via
+  // BankDataLayer.registerInterest(); see MAPPING_GUIDE.md.
+  const PRODUCTS = [
+    { name: "Life Insurance", icon: "🛡", tagline: "A term plan that protects your family's finances if something happens to you.",
+      stats: [["₹1 Cr", "Cover available"], ["₹500/mo", "Premium from"]],
+      perks: ["Sum assured up to ₹1 Crore", "Tax benefits under Sec 80C", "Optional critical illness rider"] },
+    { name: "Health Insurance", icon: "🏥", tagline: "Cashless treatment at a wide hospital network, for you and your family.",
+      stats: [["₹25L", "Cover available"], ["10,000+", "Network hospitals"]],
+      perks: ["Cashless claims at network hospitals", "Pre & post-hospitalization covered", "No-claim bonus every claim-free year"] },
+    { name: "Motor Insurance", icon: "🚘", tagline: "Third-party and own-damage cover for your car or bike.",
+      stats: [["Same-day", "Policy issuance"], ["Cashless", "Garage network"]],
+      perks: ["Third-party + own damage cover", "Cashless claims at network garages", "No Claim Bonus protection add-on"] },
+    { name: "Travel Insurance", icon: "✈", tagline: "Cover for medical emergencies, delays, and lost baggage on your next trip.",
+      stats: [["₹50L", "Medical cover"], ["190+", "Countries covered"]],
+      perks: ["Emergency medical evacuation", "Trip cancellation & delay cover", "Lost baggage & passport cover"] },
+  ];
+
+  const listEl = document.getElementById("card-list");
+  PRODUCTS.forEach(function (p) {
+    const el = document.createElement("div");
+    el.className = "tier-tile";
+    el.style.background = "var(--cat-insurance)";
+    el.innerHTML =
+      '<div class="info-snapshot">' +
+        '<div class="is-icon">' + p.icon + '</div>' +
+        '<div class="is-stats">' +
+          p.stats.map(function (s) { return '<div class="is-stat"><span class="v">' + s[0] + '</span><span class="l">' + s[1] + '</span></div>'; }).join("") +
+        '</div>' +
+      '</div>' +
+      '<span class="tt-badge">' + CATEGORY + '</span>' +
+      '<h3>' + p.name + '</h3>' +
+      '<div class="tt-tagline">' + p.tagline + '</div>' +
+      '<ul class="tt-perks">' +
+        p.perks.map(function (perk) { return '<li><span class="icon">✓</span><span>' + perk + '</span></li>'; }).join("") +
+      '</ul>' +
+      '<div class="card-details">Premiums and cover shown are indicative and subject to underwriting. *Terms &amp; conditions apply.</div>' +
+      '<div class="btn-row">' +
+        '<button class="btn btn-white know-more">Know More →</button>' +
+        '<button class="btn btn-primary interest-btn">Register Interest →</button>' +
+      '</div>';
+
+    el.addEventListener("mouseenter", function onFirstHover() {
+      BankDataLayer.click(p.name + " - View Details", { event_type: "product_click" });
+      el.removeEventListener("mouseenter", onFirstHover);
+    }, { once: true });
+
+    el.querySelector(".know-more").addEventListener("click", function () {
+      BankDataLayer.click(p.name + " - Know More", { event_type: "cta_click" });
+      el.querySelector(".card-details").classList.toggle("is-visible");
+    });
+
+    el.querySelector(".interest-btn").addEventListener("click", function (e) {
+      BankDataLayer.registerInterest(p.name, CATEGORY);
+      const btn = e.target;
+      btn.textContent = "Interest noted ✓";
+      btn.classList.add("is-registered");
+      btn.disabled = true;
+    });
+
+    listEl.appendChild(el);
+  });
+</script>
+</body>
+</html>
