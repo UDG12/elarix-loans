@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Home | Elarix</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="index.html" class="brand"><span class="mark">EL</span> Elarix</a>
+    <nav class="main-nav">
+      <a href="index.html" class="active">Home</a>
+      <a href="loans.html">Loan Products</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero" id="hero">
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <h1 id="hero-headline">Loans that move as fast as your plans.</h1>
+        <div class="presenting">Presenting</div>
+        <div class="product-name" id="hero-product-name">Personal, Home, Car &amp; Bike Loans</div>
+        <div class="hero-stats">
+          <div class="hero-stat"><span class="n" id="hero-stat-a-n">24 hrs</span><span class="label" id="hero-stat-a-label">Disbursal turnaround</span></div>
+          <div class="hero-divider"></div>
+          <div class="hero-stat"><span class="n" id="hero-stat-b-n">8.40%</span><span class="label" id="hero-stat-b-label">Interest rates from</span></div>
+        </div>
+        <div class="hero-actions">
+          <a href="loans.html" class="btn btn-primary hero-explore-btn" id="hero-explore-btn">Explore loan products →</a>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="loan-snapshot loan-snapshot--default" id="hero-mockup">
+          <div class="ls-head">
+            <div class="ls-icon" id="hero-mockup-icon">₹</div>
+            <div class="ls-head-text"><span class="ls-brand">ELARIX</span><span class="ls-product" id="hero-mockup-tier">All Products</span></div>
+          </div>
+          <div class="ls-rate" id="hero-mockup-rate">8.40% p.a.<small>Rates starting from</small></div>
+          <div>
+            <div class="ls-bar"><div class="ls-bar-fill" id="hero-mockup-bar" style="width:60%"></div></div>
+            <div class="ls-bar-label" id="hero-mockup-tenure">Tenure up to 30 years</div>
+          </div>
+          <div class="ls-foot">
+            <span id="hero-mockup-amount">4 products</span>
+            <span class="ls-badge" id="hero-mockup-badge">Compare rates</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Adobe Target real-time personalization zone. Left empty in the repo -
+       intended for a Visual Experience Composer activity (or a Launch rule
+       calling target.getOffer/applyOffer) targeted at this element, on an
+       audience such as event_type = application_submit or loan_type_browsed
+       = <product>. -->
+  <div id="target-zone-home-loan-banner" data-target-zone="home-loan-banner"></div>
+
+  <div id="personal-banner" class="personal-banner">
+    <div>
+      <h3 id="pb-headline">Welcome back</h3>
+    </div>
+    <a href="loans.html" class="pb-note" id="pb-note">Our team will reach out to you soon.</a>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>© 2026 Elarix — fictional demo site, not a real financial institution</span>
+    <span class="pill">🔧 Built for AEP Web SDK / Adobe Launch testing</span>
+  </div>
+</footer>
+
+<!-- Data Layer Inspector -->
+<div id="dl-inspector">
+  <div class="dl-toggle" id="dl-toggle">
+    <div class="left">
+      <span class="dot"></span>
+      <span class="label">adobeDataLayer</span>
+      <span class="count" id="dl-count">0</span>
+    </div>
+    <span class="chev">▲</span>
+  </div>
+  <div class="dl-body">
+    <div class="dl-hint">Live view of window.adobeDataLayer — every push() call on this page, most recent first.</div>
+    <div id="dl-events"></div>
+  </div>
+</div>
+
+<script src="js/datalayer.js"></script>
+<!-- Adobe Launch embed - commented out until this site has its own Launch
+     property. Swap in the real Elarix Launch property embed script once
+     one exists. -->
+<!-- <script src="https://assets.adobedtm.com/REPLACE_WITH_ELARIX_PROPERTY/launch.min.js" async></script> -->
+<script src="js/inspector.js"></script>
+<script>
+  // Fire the page_view event for this page load - this is the first thing
+  // that should happen in any real Adobe Launch implementation too.
+  BankDataLayer.pageView({ page_name: "Home" });
+
+  document.querySelectorAll(".hero-explore-btn").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      BankDataLayer.click("Hero - Explore Loan Products", { event_type: "cta_click" });
+    });
+  });
+
+  // Hero personalization: if the visitor previously viewed a product tile on
+  // loans.html or opened its lead form on lead.html - whether or not they
+  // actually submitted it - rewrite the single hero banner in place with
+  // that specific product's headline, rate, and snapshot panel, instead of
+  // the generic default. This is the ONLY place that nudge appears; the
+  // lower personal-banner is reserved for the "you already applied" state
+  // so the two don't show a duplicate "Continue application" prompt at once.
+  (function personalizeHero() {
+    const lastProduct = BankDataLayer.getLastViewedProduct();
+    if (!lastProduct) return;
+
+    const LOAN_HERO = {
+      "Personal Loan": { icon: "👤", statA: ["24 hrs", "Disbursal turnaround"], statB: ["10.50%", "Interest rate p.a."], bg: "linear-gradient(135deg, #14806B, #063A31)", bar: 17, tenure: "Tenure up to 60 months", amount: "Up to ₹25L", badge: "24-hr approval" },
+      "Home Loan": { icon: "🏠", statA: ["30 yrs", "Max tenure"], statB: ["8.40%", "Interest rate p.a."], bg: "linear-gradient(135deg, #1F3E73, #0A1830)", bar: 100, tenure: "Tenure up to 30 years", amount: "Up to ₹5Cr", badge: "Tax benefits" },
+      "Car Loan": { icon: "🚗", statA: ["100%", "On-road funding"], statB: ["9.10%", "Interest rate p.a."], bg: "linear-gradient(135deg, #55606F, #1B2128)", bar: 23, tenure: "Tenure up to 7 years", amount: "100% on-road", badge: "No foreclosure fee" },
+      "Bike Loan": { icon: "🏍", statA: ["₹999", "Flat processing fee"], statB: ["11.25%", "Interest rate p.a."], bg: "linear-gradient(135deg, #9C5B12, #2E1904)", bar: 13, tenure: "Tenure up to 48 months", amount: "Up to ₹3L", badge: "Minimal docs" },
+    };
+    const meta = LOAN_HERO[lastProduct.loan_type];
+    if (!meta) return;
+
+    document.getElementById("hero-headline").textContent = "Welcome back — pick up where you left off.";
+    document.getElementById("hero-product-name").textContent = lastProduct.loan_type;
+    document.getElementById("hero-stat-a-n").textContent = meta.statA[0];
+    document.getElementById("hero-stat-a-label").textContent = meta.statA[1];
+    document.getElementById("hero-stat-b-n").textContent = meta.statB[0];
+    document.getElementById("hero-stat-b-label").textContent = meta.statB[1];
+
+    const cta = document.getElementById("hero-explore-btn");
+    cta.textContent = "Continue application →";
+    cta.href = "lead.html?loan=" + encodeURIComponent(lastProduct.loan_type);
+
+    const mockup = document.getElementById("hero-mockup");
+    mockup.classList.remove("loan-snapshot--default");
+    mockup.style.background = meta.bg;
+    document.getElementById("hero-mockup-icon").textContent = meta.icon;
+    document.getElementById("hero-mockup-tier").textContent = lastProduct.loan_type;
+    document.getElementById("hero-mockup-rate").innerHTML = meta.statB[0] + " p.a.<small>Rate starting from</small>";
+    document.getElementById("hero-mockup-bar").style.width = meta.bar + "%";
+    document.getElementById("hero-mockup-tenure").textContent = meta.tenure;
+    document.getElementById("hero-mockup-amount").textContent = meta.amount;
+    document.getElementById("hero-mockup-badge").textContent = meta.badge;
+  })();
+
+  // Personal banner (below the hero): only for visitors who already
+  // submitted an application - the "still deciding" nudge lives solely in
+  // the hero now (personalizeHero above), so this never duplicates that
+  // prompt.
+  (function personalize() {
+    const profile = BankDataLayer.getApplicationProfile();
+    if (!profile) return;
+
+    const banner = document.getElementById("personal-banner");
+    const headline = document.getElementById("pb-headline");
+    const note = document.getElementById("pb-note");
+
+    headline.textContent = "Welcome back, " + profile.first_name + " — your " + profile.loan_type + " application is under review.";
+    note.textContent = "Our team will reach out to you soon.";
+    note.href = "#";
+    banner.classList.add("is-visible");
+  })();
+</script>
+</body>
+</html>

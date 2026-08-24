@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apply | Elarix</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="index.html" class="brand"><span class="mark">EL</span> Elarix</a>
+    <nav class="main-nav">
+      <a href="index.html">Home</a>
+      <a href="loans.html">Loan Products</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section style="padding:16px 0;">
+    <div class="wrap">
+      <div class="section-head section-head--compact">
+        <span class="kicker">Application</span>
+        <h2 id="form-heading">Tell us a bit about yourself</h2>
+        <p>Takes about 2 minutes. We'll text you an OTP to verify your number once submitted.</p>
+      </div>
+
+      <div class="lead-layout">
+        <div class="lead-card-panel" id="lead-card-panel">
+          <div class="loan-snapshot" id="lcp-mockup">
+            <div class="ls-head">
+              <div class="ls-icon" id="lcp-icon"></div>
+              <div class="ls-head-text"><span class="ls-brand">ELARIX</span><span class="ls-product" id="lcp-tier-label"></span></div>
+            </div>
+            <div class="ls-rate" id="lcp-rate-big"></div>
+            <div>
+              <div class="ls-bar"><div class="ls-bar-fill" id="lcp-bar-fill"></div></div>
+              <div class="ls-bar-label" id="lcp-tenure"></div>
+            </div>
+            <div class="ls-foot"><span id="lcp-amount"></span><span class="ls-badge" id="lcp-badge"></span></div>
+          </div>
+          <h3 id="lcp-name"></h3>
+          <div class="lcp-rate" id="lcp-rate"></div>
+          <ul class="perks" id="lcp-perks"></ul>
+        </div>
+
+        <div class="lead-form-col">
+          <div class="form-shell" id="form-shell">
+            <form id="lead-form" novalidate>
+              <div class="field-row">
+                <div class="field">
+                  <label for="first_name">First name <span class="req">*</span></label>
+                  <input type="text" id="first_name" name="first_name" required autocomplete="given-name">
+                </div>
+                <div class="field">
+                  <label for="last_name">Last name <span class="req">*</span></label>
+                  <input type="text" id="last_name" name="last_name" required autocomplete="family-name">
+                </div>
+              </div>
+
+              <div class="field-row">
+                <div class="field">
+                  <label for="mobile_number">Mobile number <span class="req">*</span></label>
+                  <input type="tel" id="mobile_number" name="mobile_number" required pattern="[6-9][0-9]{9}" maxlength="10" placeholder="9876543210" autocomplete="tel-national">
+                  <span class="hint">10 digits, no country code</span>
+                </div>
+                <div class="field">
+                  <label for="email_id">Email <span class="req">*</span></label>
+                  <input type="email" id="email_id" name="email_id" required autocomplete="email">
+                </div>
+              </div>
+
+              <div class="field-row">
+                <div class="field">
+                  <label for="dob">Date of birth <span class="req">*</span></label>
+                  <input type="date" id="dob" name="dob" required max="2005-12-31" min="1945-01-01">
+                </div>
+                <div class="field">
+                  <label for="pan">PAN <span class="req">*</span></label>
+                  <input type="text" id="pan" name="pan" required pattern="[A-Za-z]{5}[0-9]{4}[A-Za-z]{1}" maxlength="10" placeholder="ABCDE1234F" style="text-transform:uppercase;">
+                  <span class="hint">Used for eKYC — never stored in plaintext in production</span>
+                </div>
+              </div>
+
+              <div class="field-row">
+                <div class="field">
+                  <label for="city">City <span class="req">*</span></label>
+                  <select id="city" name="city" required>
+                    <option value="" disabled selected>Select city</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="state">State</label>
+                  <input type="text" id="state" name="state" readonly placeholder="Auto-filled from city">
+                </div>
+              </div>
+
+              <div class="field-row">
+                <div class="field">
+                  <label for="employment_type">Employment type <span class="req">*</span></label>
+                  <select id="employment_type" name="employment_type" required>
+                    <option value="" disabled selected>Select type</option>
+                    <option value="Salaried">Salaried</option>
+                    <option value="Self-Employed">Self-Employed</option>
+                    <option value="Self-Employed Professional">Self-Employed Professional</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="monthly_income_inr">Monthly income (₹) <span class="req">*</span></label>
+                  <input type="number" id="monthly_income_inr" name="monthly_income_inr" required min="10000" step="1000" placeholder="75000">
+                </div>
+              </div>
+
+              <div class="field-row">
+                <div class="field">
+                  <label for="loan_amount_requested">Loan amount requested (₹) <span class="req">*</span></label>
+                  <input type="number" id="loan_amount_requested" name="loan_amount_requested" required min="10000" step="5000" placeholder="500000">
+                </div>
+                <div class="field">
+                  <label for="tenure_months">Tenure (months) <span class="req">*</span></label>
+                  <input type="number" id="tenure_months" name="tenure_months" required min="3" placeholder="36">
+                  <span class="hint" id="tenure-hint"></span>
+                </div>
+              </div>
+
+              <div class="field-row" id="purpose-row" style="display:none;">
+                <div class="field">
+                  <label for="loan_purpose">Purpose of loan <span class="req">*</span></label>
+                  <select id="loan_purpose" name="loan_purpose">
+                    <option value="" disabled selected>Select purpose</option>
+                    <option value="Medical Emergency">Medical Emergency</option>
+                    <option value="Wedding">Wedding</option>
+                    <option value="Travel">Travel</option>
+                    <option value="Home Renovation">Home Renovation</option>
+                    <option value="Debt Consolidation">Debt Consolidation</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="existing_emi_inr">Existing monthly EMIs (₹)</label>
+                  <input type="number" id="existing_emi_inr" name="existing_emi_inr" min="0" step="500" placeholder="0">
+                  <span class="hint">Leave blank if none</span>
+                </div>
+              </div>
+
+              <div class="consent-row">
+                <input type="checkbox" id="consent" required>
+                <label for="consent">I authorize Elarix to verify my details via eKYC and contact me about this application via SMS, email, or phone.</label>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-block">Submit application →</button>
+            </form>
+          </div>
+
+          <div class="success-panel form-shell" id="success-panel">
+            <div class="check">✓</div>
+            <h2>Application submitted</h2>
+            <p>We've sent an OTP to your mobile number. Your reference ID is below — keep it for tracking.</p>
+            <div class="lead-id-chip" id="success-lead-id">LNAPPWEB000000</div>
+            <div>
+              <a href="index.html" class="btn btn-dark">Back to Home →</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>© 2026 Elarix — fictional demo site, not a real financial institution</span>
+    <span class="pill">🔧 Built for AEP Web SDK / Adobe Launch testing</span>
+  </div>
+</footer>
+
+<!-- Data Layer Inspector -->
+<div id="dl-inspector">
+  <div class="dl-toggle" id="dl-toggle">
+    <div class="left">
+      <span class="dot"></span>
+      <span class="label">adobeDataLayer</span>
+      <span class="count" id="dl-count">0</span>
+    </div>
+    <span class="chev">▲</span>
+  </div>
+  <div class="dl-body">
+    <div class="dl-hint">Live view of window.adobeDataLayer — every push() call on this page, most recent first.</div>
+    <div id="dl-events"></div>
+  </div>
+</div>
+
+<script src="js/datalayer.js"></script>
+<!-- Adobe Launch embed - commented out until this site has its own Launch
+     property. Swap in the real Elarix Launch property embed script once
+     one exists. -->
+<!-- <script src="https://assets.adobedtm.com/REPLACE_WITH_ELARIX_PROPERTY/launch.min.js" async></script> -->
+<script src="js/inspector.js"></script>
+<script>
+  // Same city -> state mapping used across the site, kept identical so
+  // form submissions stay internally consistent.
+  const CITY_STATE_MAP = {
+    "Mumbai": "Maharashtra", "Pune": "Maharashtra",
+    "Delhi": "Delhi",
+    "Bengaluru": "Karnataka",
+    "Chennai": "Tamil Nadu",
+    "Hyderabad": "Telangana",
+    "Kolkata": "West Bengal",
+    "Ahmedabad": "Gujarat", "Vadodara": "Gujarat", "Surat": "Gujarat",
+    "Jaipur": "Rajasthan",
+    "Lucknow": "Uttar Pradesh",
+    "Chandigarh": "Chandigarh",
+    "Kochi": "Kerala",
+    "Indore": "Madhya Pradesh",
+  };
+  const LOAN_COLORS = {
+    "Personal Loan": "var(--loan-personal)", "Home Loan": "var(--loan-home)",
+    "Car Loan": "var(--loan-car)", "Bike Loan": "var(--loan-bike)",
+  };
+  // Same rate/perks/icon copy as the LOANS catalog on loans.html, keyed by
+  // loan name so the lead form can show a summary without needing that
+  // page's data. maxTenureMonths drives the tenure input's max + hint; bar
+  // is the tenure-meter fill (%, relative to Home Loan's 30-year max).
+  const LOAN_DETAILS = {
+    "Personal Loan": { icon: "👤", rate: "10.50% p.a. onwards", rateShort: "10.50%", bg: "linear-gradient(135deg, #14806B, #063A31)",
+      tenureText: "Tenure up to 60 months", maxTenureMonths: 60, bar: 17, amount: "Up to ₹25L", badge: "24-hr approval",
+      perks: ["100% unsecured, no collateral", "Disbursal in 24 hours", "Flexible tenure, 12–60 months"] },
+    "Home Loan": { icon: "🏠", rate: "8.40% p.a. onwards", rateShort: "8.40%", bg: "linear-gradient(135deg, #1F3E73, #0A1830)",
+      tenureText: "Tenure up to 30 years", maxTenureMonths: 360, bar: 100, amount: "Up to ₹5Cr", badge: "Tax benefits",
+      perks: ["Balance transfer with top-up available", "Doorstep document pickup", "Tax benefits under Sec 80C & 24(b)"] },
+    "Car Loan": { icon: "🚗", rate: "9.10% p.a. onwards", rateShort: "9.10%", bg: "linear-gradient(135deg, #55606F, #1B2128)",
+      tenureText: "Tenure up to 7 years", maxTenureMonths: 84, bar: 23, amount: "100% on-road", badge: "No foreclosure fee",
+      perks: ["New & pre-owned car funding", "Same-day in-principle approval", "No foreclosure charges after 6 EMIs"] },
+    "Bike Loan": { icon: "🏍", rate: "11.25% p.a. onwards", rateShort: "11.25%", bg: "linear-gradient(135deg, #9C5B12, #2E1904)",
+      tenureText: "Tenure up to 48 months", maxTenureMonths: 48, bar: 13, amount: "Up to ₹3L", badge: "Minimal docs",
+      perks: ["Funding for EVs & premium bikes", "Minimal documentation", "Instant approval for salaried applicants"] },
+  };
+
+  const params = new URLSearchParams(window.location.search);
+  const selectedLoan = LOAN_DETAILS[params.get("loan")] ? params.get("loan") : "Personal Loan";
+  const details = LOAN_DETAILS[selectedLoan];
+
+  BankDataLayer.pageView({ page_name: "Lead Submission", loan_type_browsed: selectedLoan });
+
+  // Record that this product's application page was visited, regardless of
+  // whether the visitor actually fills in or submits the form - this is
+  // what lets the home page hero personalize around "the product they were
+  // last looking at applying for" on their next visit.
+  BankDataLayer.setLastViewedProduct(selectedLoan);
+
+  // Populate the loan details panel (left column)
+  document.getElementById("form-heading").textContent = "Apply for " + selectedLoan;
+  document.getElementById("lead-card-panel").style.background = LOAN_COLORS[selectedLoan] || "var(--brand)";
+  document.getElementById("lcp-mockup").style.background = details.bg;
+  document.getElementById("lcp-tier-label").textContent = selectedLoan;
+  document.getElementById("lcp-icon").textContent = details.icon;
+  document.getElementById("lcp-rate-big").innerHTML = details.rateShort + " p.a.<small>Rate starting from</small>";
+  document.getElementById("lcp-bar-fill").style.width = details.bar + "%";
+  document.getElementById("lcp-tenure").textContent = details.tenureText;
+  document.getElementById("lcp-amount").textContent = details.amount;
+  document.getElementById("lcp-badge").textContent = details.badge;
+  document.getElementById("lcp-name").textContent = selectedLoan;
+  document.getElementById("lcp-rate").textContent = details.rate;
+  document.getElementById("lcp-perks").innerHTML = details.perks.map(function (p) { return "<li>" + p + "</li>"; }).join("");
+
+  // Tenure field: cap + hint driven by the selected product's max tenure.
+  const tenureInput = document.getElementById("tenure_months");
+  tenureInput.max = details.maxTenureMonths;
+  document.getElementById("tenure-hint").textContent = details.tenureText;
+
+  // Purpose/existing-EMI row only makes sense for unsecured Personal Loans.
+  if (selectedLoan === "Personal Loan") {
+    document.getElementById("purpose-row").style.display = "";
+    document.getElementById("loan_purpose").required = true;
+  }
+
+  // Populate city dropdown
+  const citySelect = document.getElementById("city");
+  Object.keys(CITY_STATE_MAP).sort().forEach(function (city) {
+    const opt = document.createElement("option");
+    opt.value = city; opt.textContent = city;
+    citySelect.appendChild(opt);
+  });
+  citySelect.addEventListener("change", function () {
+    document.getElementById("state").value = CITY_STATE_MAP[citySelect.value] || "";
+  });
+
+  // application_start fires once, on the first meaningful interaction with
+  // the form (not just on page load - page_view already covers that).
+  // application_start happens before application_submit, and only for
+  // people who actually engaged with the form.
+  let startFired = false;
+  document.getElementById("lead-form").addEventListener("focusin", function () {
+    if (startFired) return;
+    startFired = true;
+    BankDataLayer.applicationStart(selectedLoan);
+  });
+
+  document.getElementById("lead-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    const form = e.target;
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+
+    const profile = {
+      mobile_number: document.getElementById("mobile_number").value.trim(),
+      first_name: document.getElementById("first_name").value.trim(),
+      last_name: document.getElementById("last_name").value.trim(),
+      email_id: document.getElementById("email_id").value.trim(),
+      pan: document.getElementById("pan").value.trim().toUpperCase(),
+      dob: document.getElementById("dob").value,
+      city: document.getElementById("city").value,
+      state: document.getElementById("state").value,
+      employment_type: document.getElementById("employment_type").value,
+      monthly_income_inr: Number(document.getElementById("monthly_income_inr").value),
+      loan_type: selectedLoan,
+      loan_amount_requested: Number(document.getElementById("loan_amount_requested").value),
+      tenure_months: Number(document.getElementById("tenure_months").value),
+      loan_purpose: selectedLoan === "Personal Loan" ? document.getElementById("loan_purpose").value : "",
+      existing_emi_inr: Number(document.getElementById("existing_emi_inr").value) || 0,
+    };
+
+    const entry = BankDataLayer.applicationSubmit(profile);
+
+    document.getElementById("success-lead-id").textContent = entry.loan.application_id;
+    document.getElementById("form-shell").style.display = "none";
+    document.getElementById("success-panel").classList.add("is-visible");
+  });
+</script>
+</body>
+</html>

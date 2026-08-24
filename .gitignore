@@ -1,0 +1,4 @@
+*.sec.endpointdlp
+*:sec.endpointdlp
+.vercel
+.env*

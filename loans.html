@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loan Products | Elarix</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="index.html" class="brand"><span class="mark">EL</span> Elarix</a>
+    <nav class="main-nav">
+      <a href="index.html">Home</a>
+      <a href="loans.html" class="active">Loan Products</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section style="padding-top:52px;padding-bottom:12px;">
+    <div class="wrap">
+      <div class="section-head" id="compare">
+        <span class="kicker">Loan Products</span>
+        <h2>Four products, one application flow</h2>
+        <p>Every loan ships with instant eKYC and same-day in-principle approval. Pick the product that matches your need — you can always add on later from the app.</p>
+      </div>
+
+      <div class="card-list" id="card-list"><!-- populated by JS --></div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>© 2026 Elarix — fictional demo site, not a real financial institution</span>
+    <span class="pill">🔧 Built for AEP Web SDK / Adobe Launch testing</span>
+  </div>
+</footer>
+
+<!-- Data Layer Inspector -->
+<div id="dl-inspector">
+  <div class="dl-toggle" id="dl-toggle">
+    <div class="left">
+      <span class="dot"></span>
+      <span class="label">adobeDataLayer</span>
+      <span class="count" id="dl-count">0</span>
+    </div>
+    <span class="chev">▲</span>
+  </div>
+  <div class="dl-body">
+    <div class="dl-hint">Live view of window.adobeDataLayer — every push() call on this page, most recent first.</div>
+    <div id="dl-events"></div>
+  </div>
+</div>
+
+<script src="js/datalayer.js"></script>
+<!-- Adobe Launch embed - commented out until this site has its own Launch
+     property. Swap in the real Elarix Launch property embed script once
+     one exists. -->
+<!-- <script src="https://assets.adobedtm.com/REPLACE_WITH_ELARIX_PROPERTY/launch.min.js" async></script> -->
+<script src="js/inspector.js"></script>
+<script>
+  BankDataLayer.pageView({ page_name: "Loan Products" });
+
+  // Loan catalog - 4 products, same field set the lead form and hero
+  // personalization key off of (loan_type / interest rate / tenure).
+  // Colors match the CSS custom properties defined for --loan-personal /
+  // --loan-home / --loan-car / --loan-bike. `bar` is the tenure-meter fill
+  // (%, relative to Home Loan's 30-year max) shown on the snapshot panel.
+  const LOANS = [
+    { name: "Personal Loan", icon: "👤", color: "var(--loan-personal)", bg: "linear-gradient(135deg, #14806B, #063A31)", rate: "10.50% p.a. onwards", rateShort: "10.50%",
+      maxAmount: "Up to ₹25 Lakhs", tenure: "Up to 60 months", bar: 17, badge: "24-hr approval", fee: "Up to 2%",
+      perks: [["✓", "100% unsecured, no collateral"], ["⚡", "Disbursal in 24 hours"], ["📅", "Flexible tenure, 12–60 months"]] },
+    { name: "Home Loan", icon: "🏠", color: "var(--loan-home)", bg: "linear-gradient(135deg, #1F3E73, #0A1830)", rate: "8.40% p.a. onwards", rateShort: "8.40%",
+      maxAmount: "Up to ₹5 Crore", tenure: "Up to 30 years", bar: 100, badge: "Tax benefits", fee: "0.35% (max ₹11,500)",
+      perks: [["↔", "Balance transfer with top-up available"], ["🚪", "Doorstep document pickup"], ["💰", "Tax benefits under Sec 80C & 24(b)"]] },
+    { name: "Car Loan", icon: "🚗", color: "var(--loan-car)", bg: "linear-gradient(135deg, #55606F, #1B2128)", rate: "9.10% p.a. onwards", rateShort: "9.10%",
+      maxAmount: "Up to 100% on-road funding", tenure: "Up to 7 years", bar: 23, badge: "No foreclosure fee", fee: "Up to 1%",
+      perks: [["🚙", "New & pre-owned car funding"], ["⚡", "Same-day in-principle approval"], ["✓", "No foreclosure charges after 6 EMIs"]] },
+    { name: "Bike Loan", icon: "🏍", color: "var(--loan-bike)", bg: "linear-gradient(135deg, #9C5B12, #2E1904)", rate: "11.25% p.a. onwards", rateShort: "11.25%",
+      maxAmount: "Up to ₹3 Lakhs", tenure: "Up to 48 months", bar: 13, badge: "Minimal docs", fee: "Flat ₹999",
+      perks: [["🔋", "Funding for EVs & premium bikes"], ["📄", "Minimal documentation"], ["⚡", "Instant approval for salaried applicants"]] },
+  ];
+
+  const listEl = document.getElementById("card-list");
+  LOANS.forEach(function (loan) {
+    const el = document.createElement("div");
+    el.className = "tier-tile";
+    el.style.background = loan.color;
+    el.innerHTML =
+      '<div class="loan-snapshot" style="background:' + loan.bg + '">' +
+        '<div class="ls-head">' +
+          '<div class="ls-icon">' + loan.icon + '</div>' +
+          '<div class="ls-head-text"><span class="ls-brand">ELARIX</span><span class="ls-product">' + loan.name + '</span></div>' +
+        '</div>' +
+        '<div class="ls-rate">' + loan.rateShort + ' p.a.<small>Rate starting from</small></div>' +
+        '<div>' +
+          '<div class="ls-bar"><div class="ls-bar-fill" style="width:' + loan.bar + '%"></div></div>' +
+          '<div class="ls-bar-label">' + loan.tenure + '</div>' +
+        '</div>' +
+        '<div class="ls-foot"><span>' + loan.maxAmount + '</span><span class="ls-badge">' + loan.badge + '</span></div>' +
+      '</div>' +
+      '<span class="tt-badge">' + loan.name + '</span>' +
+      '<h3>' + loan.name + '</h3>' +
+      '<div class="tt-rate">' + loan.rate + ' · ' + loan.maxAmount + '</div>' +
+      '<ul class="tt-perks">' +
+        loan.perks.map(function (p) { return '<li><span class="icon">' + p[0] + '</span><span>' + p[1] + '</span></li>'; }).join("") +
+      '</ul>' +
+      '<div class="card-details">Processing fee: ' + loan.fee + '. Tenure ' + loan.tenure + '. *Terms &amp; conditions apply. Rates and fees subject to change.</div>' +
+      '<div class="btn-row">' +
+        '<button class="btn btn-white know-more">Know More →</button>' +
+        '<button class="btn btn-primary apply-now" data-loan="' + loan.name + '">Apply Now →</button>' +
+      '</div>';
+
+    // product_click fires when the whole panel is viewed/interacted with;
+    // the specific "Apply Now" button fires a separate cta_click (apply)
+    // before navigating to the lead form - a two-stage funnel
+    // (product_click then cta_click then application_start on the next
+    // page).
+    el.addEventListener("mouseenter", function onFirstHover() {
+      BankDataLayer.productClick(loan.name);
+      el.removeEventListener("mouseenter", onFirstHover);
+    }, { once: true });
+
+    el.querySelector(".know-more").addEventListener("click", function () {
+      BankDataLayer.click(loan.name + " - Know More", { event_type: "cta_click" });
+      el.querySelector(".card-details").classList.toggle("is-visible");
+    });
+
+    el.querySelector(".apply-now").addEventListener("click", function () {
+      BankDataLayer.applyClick(loan.name);
+      const params = new URLSearchParams(window.location.search);
+      params.set("loan", loan.name);
+      window.location.href = "lead.html?" + params.toString();
+    });
+
+    listEl.appendChild(el);
+  });
+</script>
+</body>
+</html>
