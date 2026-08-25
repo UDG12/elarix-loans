@@ -36,15 +36,15 @@ product was picked).
 |---|---|---|
 | Home | `index.html` | Landing page. Has an empty Target personalization zone — see `MAPPING_GUIDE.md`. |
 | Accounts & Deposits | `accounts.html` | Savings, Salary, Current accounts + Fixed/Recurring Deposits (5 products). "Open Account" leads to `accounts-lead.html`. |
-| — Accounts lead form | `accounts-lead.html` | Submitting fires `bank.accountOpenSubmit`. |
+| — Accounts lead form | `accounts-lead.html` | Submitting fires `bob.accountOpenSubmit`. |
 | Cards | `cards.html` | Credit, Debit, Forex, Prepaid cards (4 products). "Apply Now" leads to `cards-lead.html`. |
-| — Cards lead form | `cards-lead.html` | Submitting fires `bank.cardApplicationSubmit`. |
+| — Cards lead form | `cards-lead.html` | Submitting fires `bob.cardApplicationSubmit`. |
 | Loans | `loans.html` | 8 loan products (Personal, Home, Car, Bike, Education, Gold, Business, Loan Against Property). "Apply Now" leads to `lead.html`. |
-| — Loans lead form | `lead.html` | Submitting fires `loan.applicationSubmit`. |
+| — Loans lead form | `lead.html` | Submitting fires `bob.applicationSubmit`. |
 | Insurance | `insurance.html` | Life, Health, Motor, Travel insurance (4 products). "Get Insured" leads to `insurance-lead.html`. |
-| — Insurance lead form | `insurance-lead.html` | Submitting fires `bank.insuranceApplicationSubmit`. |
+| — Insurance lead form | `insurance-lead.html` | Submitting fires `bob.insuranceApplicationSubmit`. |
 | Investments | `investments.html` | Mutual Funds, Demat & Trading, IPO, PPF & NPS (4 products). "Invest Now" leads to `investments-lead.html`. |
-| — Investments lead form | `investments-lead.html` | Submitting fires `bank.investmentApplicationSubmit`. |
+| — Investments lead form | `investments-lead.html` | Submitting fires `bob.investmentApplicationSubmit`. |
 
 ## What this site does and doesn't do
 
@@ -80,9 +80,15 @@ testing, before wiring up real Launch rules. Click the bar to open it.
   processing the submission, not the browser. See `MAPPING_GUIDE.md`.
 - Every page currently loads the **BOB Cards** demo site's Adobe Launch
   property (`launch-81122a58b9b9-development.min.js`), reused as a stand-in
-  since Elarix doesn't have its own Launch property yet. It's the same
-  Adobe sandbox/account, but its rules/data-element mappings are configured
-  for BOB Cards' schema, not this site's — swap in a real Elarix-specific
-  property embed URL once one exists.
+  since Elarix doesn't have its own Launch property yet. All events here
+  push under a `bob.*` name (see `MAPPING_GUIDE.md` section 1) specifically
+  so the BOB Cards property's existing Launch rules — which trigger on
+  those same `bob.*` event names — fire correctly on this site too. What
+  they *don't* do yet is map the right fields: those rules' XDM Data
+  Element mappings were built for BOB Cards' card-lead schema
+  (`card_type_browsed`, `interested_card_name`, ...), not this site's
+  loan/account/card/insurance/investment schemas — so events fire, but the
+  data landing in AEP won't be Elarix's fields until those mappings are
+  updated too, or this site gets its own dedicated Launch property.
 - Google Fonts (Sora/Inter/JetBrains Mono) require internet access to load;
   the site has system-font fallbacks if they don't load.

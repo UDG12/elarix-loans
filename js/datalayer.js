@@ -144,37 +144,37 @@ const BankDataLayer = (function () {
 
   // ---- Public event helpers - one per event_type in our schema ----
   function pageView(opts) {
-    return push("loan.pageView", Object.assign({ event_type: "page_view" }, opts || {}));
+    return push("bob.pageView", Object.assign({ event_type: "page_view" }, opts || {}));
   }
   function click(clickTarget, opts) {
-    return push("loan.click", Object.assign({
+    return push("bob.click", Object.assign({
       event_type: (opts && opts.event_type) || "cta_click",
       click_target: clickTarget,
     }, opts || {}));
   }
   function productClick(loanType) {
     setLastViewedProduct(loanType);
-    return push("loan.productClick", {
+    return push("bob.productClick", {
       event_type: "product_click",
       click_target: loanType + " - View Details",
       loan_type_browsed: loanType,
     });
   }
   function applyClick(loanType) {
-    return push("loan.applyClick", {
+    return push("bob.applyClick", {
       event_type: "cta_click",
       click_target: loanType + " - Apply Now",
       loan_type_browsed: loanType,
     });
   }
   function offerClick(target, loanType) {
-    return push("loan.offerClick", { event_type: "offer_click", click_target: target, loan_type_browsed: loanType || "" });
+    return push("bob.offerClick", { event_type: "offer_click", click_target: target, loan_type_browsed: loanType || "" });
   }
   function bannerClick(target) {
-    return push("loan.bannerClick", { event_type: "banner_click", click_target: target });
+    return push("bob.bannerClick", { event_type: "banner_click", click_target: target });
   }
   function applicationStart(loanType) {
-    return push("loan.applicationStart", {
+    return push("bob.applicationStart", {
       event_type: "application_start",
       loan_type_browsed: loanType,
       click_target: loanType + " - Lead Form Opened",
@@ -193,7 +193,7 @@ const BankDataLayer = (function () {
     localStorage.removeItem(STORAGE.lastProduct);
     const attribution = getAttribution();
     fullProfile.campaign = fullProfile.campaign || attribution.campaign;
-    return push("loan.applicationSubmit",
+    return push("bob.applicationSubmit",
       { event_type: "application_submit", application_id: applicationId, loan_type_browsed: applicationProfile.loan_type,
         click_target: "Submit Application" },
       { loan: fullProfile }
@@ -228,10 +228,10 @@ const BankDataLayer = (function () {
       extra
     );
   }
-  function accountOpenSubmit(profile) { return categorySubmit("bank.accountOpenSubmit", "account", "ACCWEB", profile); }
-  function cardApplicationSubmit(profile) { return categorySubmit("bank.cardApplicationSubmit", "card", "CARDWEB", profile); }
-  function insuranceApplicationSubmit(profile) { return categorySubmit("bank.insuranceApplicationSubmit", "insurance", "INSWEB", profile); }
-  function investmentApplicationSubmit(profile) { return categorySubmit("bank.investmentApplicationSubmit", "investment", "INVWEB", profile); }
+  function accountOpenSubmit(profile) { return categorySubmit("bob.accountOpenSubmit", "account", "ACCWEB", profile); }
+  function cardApplicationSubmit(profile) { return categorySubmit("bob.cardApplicationSubmit", "card", "CARDWEB", profile); }
+  function insuranceApplicationSubmit(profile) { return categorySubmit("bob.insuranceApplicationSubmit", "insurance", "INSWEB", profile); }
+  function investmentApplicationSubmit(profile) { return categorySubmit("bob.investmentApplicationSubmit", "investment", "INVWEB", profile); }
 
   return {
     getOrCreateECID, nowIST, getAttribution, getMobile, getApplicationId, getApplicationProfile,

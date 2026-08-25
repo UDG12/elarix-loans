@@ -45,7 +45,7 @@ web.channel
 web.campaign
 ```
 
-**`loan` object (present ONLY on the `loan.applicationSubmit` event):**
+**`loan` object (present ONLY on the `bob.applicationSubmit` event):**
 ```
 loan.mobile_number
 loan.first_name
@@ -69,7 +69,7 @@ loan.application_created_date
 loan.campaign
 ```
 
-**`account` object (present ONLY on `bank.accountOpenSubmit` — see section 4 for the per-product extra fields, which vary):**
+**`account` object (present ONLY on `bob.accountOpenSubmit` — see section 4 for the per-product extra fields, which vary):**
 ```
 account.mobile_number
 account.first_name
@@ -86,7 +86,7 @@ account.application_created_date
 account.campaign
 ```
 
-**`card` object (present ONLY on `bank.cardApplicationSubmit` — see section 5 for the per-product extra fields):**
+**`card` object (present ONLY on `bob.cardApplicationSubmit` — see section 5 for the per-product extra fields):**
 ```
 card.mobile_number
 card.first_name
@@ -103,7 +103,7 @@ card.application_created_date
 card.campaign
 ```
 
-**`insurance` object (present ONLY on `bank.insuranceApplicationSubmit` — see section 6 for the per-product extra fields):**
+**`insurance` object (present ONLY on `bob.insuranceApplicationSubmit` — see section 6 for the per-product extra fields):**
 ```
 insurance.mobile_number
 insurance.first_name
@@ -120,7 +120,7 @@ insurance.application_created_date
 insurance.campaign
 ```
 
-**`investment` object (present ONLY on `bank.investmentApplicationSubmit` — see section 7 for the per-product extra fields):**
+**`investment` object (present ONLY on `bob.investmentApplicationSubmit` — see section 7 for the per-product extra fields):**
 ```
 investment.mobile_number
 investment.first_name
@@ -146,38 +146,41 @@ event
 
 ## 1. Events this site pushes
 
-The `loan.*` name prefix on the shared events predates the non-loan pages
-and functions as this site's general push-event namespace (e.g. `loan.click`
-fires from every page, not just Loans) — it wasn't renamed when Accounts /
-Cards / Insurance / Investments were added, so don't read it as
-loan-specific. The 4 newer category submits use a `bank.*` prefix instead,
-since they were added as their own named events rather than reusing `click()`.
+Every event name uses a `bob.*` prefix — this site reuses the BOB Cards
+demo site's Adobe Launch property (see the README's known-limitations
+section and the `js/leadform.js` note below), and that property's existing
+Launch rules are built to match `bob.*` event names specifically. The
+prefix isn't loan-specific — `bob.click` fires from every page, not just
+Loans — it's just the namespace this Launch property recognizes. If this
+site ever gets its own dedicated Launch property, the prefix can become
+whatever's convenient (`elarix.*`, `loan.*`/`bank.*` split by category,
+etc.) since nothing else in the codebase depends on the literal string.
 
 | `event` name | Fires when | `event_type` value |
 |---|---|---|
-| `loan.pageView` | Every page load, all 13 pages | `page_view` |
-| `loan.click` | Hero CTA buttons on Home; "Know More" toggles and tile hover on all 5 catalog pages; "Application Form Opened" on all 4 non-loan lead pages (reused with `event_type: "application_start"` instead of a dedicated function — see section 4-7 notes) | `cta_click`, `product_click`, or `application_start` |
-| `loan.productClick` | First hover/view of a product tile on the Loan Products page specifically | `product_click` |
-| `loan.applyClick` | Clicking "Apply Now" on a Loans product tile | `cta_click` |
-| `loan.offerClick` | Reserved for promotional banners/offers (not currently used on any page, but the helper exists — call `BankDataLayer.offerClick(target, loanType)` from any new offer element) | `offer_click` |
-| `loan.bannerClick` | Reserved for a Target-driven banner's CTA (see the Target callout below) | `banner_click` |
-| `loan.applicationStart` | First focus into any field on the Loans lead form | `application_start` |
-| `loan.applicationSubmit` | Loans lead form successfully submitted | `application_submit` |
-| `bank.accountOpenSubmit` | Accounts & Deposits lead form successfully submitted | `application_submit` |
-| `bank.cardApplicationSubmit` | Cards lead form successfully submitted | `application_submit` |
-| `bank.insuranceApplicationSubmit` | Insurance lead form successfully submitted | `application_submit` |
-| `bank.investmentApplicationSubmit` | Investments lead form successfully submitted | `application_submit` |
+| `bob.pageView` | Every page load, all 13 pages | `page_view` |
+| `bob.click` | Hero CTA buttons on Home; "Know More" toggles and tile hover on all 5 catalog pages; "Application Form Opened" on all 4 non-loan lead pages (reused with `event_type: "application_start"` instead of a dedicated function — see section 4-7 notes) | `cta_click`, `product_click`, or `application_start` |
+| `bob.productClick` | First hover/view of a product tile on the Loan Products page specifically | `product_click` |
+| `bob.applyClick` | Clicking "Apply Now" on a Loans product tile | `cta_click` |
+| `bob.offerClick` | Reserved for promotional banners/offers (not currently used on any page, but the helper exists — call `BankDataLayer.offerClick(target, loanType)` from any new offer element) | `offer_click` |
+| `bob.bannerClick` | Reserved for a Target-driven banner's CTA (see the Target callout below) | `banner_click` |
+| `bob.applicationStart` | First focus into any field on the Loans lead form | `application_start` |
+| `bob.applicationSubmit` | Loans lead form successfully submitted | `application_submit` |
+| `bob.accountOpenSubmit` | Accounts & Deposits lead form successfully submitted | `application_submit` |
+| `bob.cardApplicationSubmit` | Cards lead form successfully submitted | `application_submit` |
+| `bob.insuranceApplicationSubmit` | Insurance lead form successfully submitted | `application_submit` |
+| `bob.investmentApplicationSubmit` | Investments lead form successfully submitted | `application_submit` |
 
 Every push has this shape (only one of `loan`/`account`/`card`/`insurance`/`investment` is ever present on a given event, and only on that category's `*Submit` event):
 ```js
 {
-  event: "loan.pageView",      // one of the 11 names above
+  event: "bob.pageView",      // one of the 11 names above
   web: { ...fields, see section 2 },
-  loan: { ...fields, see section 3 },         // ONLY on loan.applicationSubmit
-  account: { ...fields, see section 4 },      // ONLY on bank.accountOpenSubmit
-  card: { ...fields, see section 5 },         // ONLY on bank.cardApplicationSubmit
-  insurance: { ...fields, see section 6 },    // ONLY on bank.insuranceApplicationSubmit
-  investment: { ...fields, see section 7 }    // ONLY on bank.investmentApplicationSubmit
+  loan: { ...fields, see section 3 },         // ONLY on bob.applicationSubmit
+  account: { ...fields, see section 4 },      // ONLY on bob.accountOpenSubmit
+  card: { ...fields, see section 5 },         // ONLY on bob.cardApplicationSubmit
+  insurance: { ...fields, see section 6 },    // ONLY on bob.insuranceApplicationSubmit
+  investment: { ...fields, see section 7 }    // ONLY on bob.investmentApplicationSubmit
 }
 ```
 
@@ -206,7 +209,7 @@ Create each of these as a Launch **Data Element**, type **"Data Layer variable v
 
 ## 3. `loan` object → Data Elements → loan application schema
 
-Only exists on the `loan.applicationSubmit` push. Same approach: one Data Element per field, path rooted at `loan.*`.
+Only exists on the `bob.applicationSubmit` push. Same approach: one Data Element per field, path rooted at `loan.*`.
 
 | Data Element name | Path | XDM field | Type | Notes |
 |---|---|---|---|---|
@@ -235,7 +238,7 @@ Only exists on the `loan.applicationSubmit` push. Same approach: one Data Elemen
 
 ## 4. `account` object → Data Elements → Accounts & Deposits schema
 
-Only exists on `bank.accountOpenSubmit`, fired from `accounts-lead.html`. The
+Only exists on `bob.accountOpenSubmit`, fired from `accounts-lead.html`. The
 common fields (mobile/name/email/pan/dob/city/state/country/reference_id/
 created_date/campaign) are identical in shape to the `loan` object above —
 only the product-specific fields differ by which of the 5 products was
@@ -271,7 +274,7 @@ selected (`PRODUCT_EXTRA_FIELDS` in `accounts-lead.html`).
 
 ## 5. `card` object → Data Elements → Cards schema
 
-Only exists on `bank.cardApplicationSubmit`, fired from `cards-lead.html`.
+Only exists on `bob.cardApplicationSubmit`, fired from `cards-lead.html`.
 
 | Data Element name | Path | XDM field | Type | Notes |
 |---|---|---|---|---|
@@ -299,7 +302,7 @@ Only exists on `bank.cardApplicationSubmit`, fired from `cards-lead.html`.
 
 ## 6. `insurance` object → Data Elements → Insurance schema
 
-Only exists on `bank.insuranceApplicationSubmit`, fired from `insurance-lead.html`.
+Only exists on `bob.insuranceApplicationSubmit`, fired from `insurance-lead.html`.
 
 | Data Element name | Path | XDM field | Type | Notes |
 |---|---|---|---|---|
@@ -335,7 +338,7 @@ Only exists on `bank.insuranceApplicationSubmit`, fired from `insurance-lead.htm
 
 ## 7. `investment` object → Data Elements → Investments schema
 
-Only exists on `bank.investmentApplicationSubmit`, fired from `investments-lead.html`.
+Only exists on `bob.investmentApplicationSubmit`, fired from `investments-lead.html`.
 
 | Data Element name | Path | XDM field | Type | Notes |
 |---|---|---|---|---|
@@ -369,9 +372,9 @@ Only exists on `bank.investmentApplicationSubmit`, fired from `investments-lead.
 One rule per event, all using the same trigger pattern:
 
 ```
-Event:     Core - Direct Call Rule  (name: matches the "event" string, e.g. "loan.pageView")
+Event:     Core - Direct Call Rule  (name: matches the "event" string, e.g. "bob.pageView")
            — or, if using the ACDL extension: "Adobe Client Data Layer > Event pushed",
-             filtered to Event Name = "loan.pageView"
+             filtered to Event Name = "bob.pageView"
 Condition: (none needed - the event name match above is the filter)
 Action:    AEP Web SDK > Send Event
            XDM data: map each Data Element from sections 2-7 to its schema field
@@ -411,7 +414,7 @@ alloy("getIdentity").then(function (result) {
 with **zero JavaScript deciding what goes in it**. That's deliberate:
 
 1. **Audience**: build a Target/AEP audience on the signal this data layer
-   already produces — e.g. "has a `loan.applicationSubmit` event in the last
+   already produces — e.g. "has a `bob.applicationSubmit` event in the last
    7 days", or "`loan_type_browsed` equals `Home Loan`" for product-specific
    personalization. The same pattern extends to the other 4 categories using
    their own `*Submit` events (section 1).
@@ -423,7 +426,7 @@ with **zero JavaScript deciding what goes in it**. That's deliberate:
 3. **Rendering**: Target's own `at.js` (or the Web SDK's personalization
    module, `alloy("sendEvent", { renderDecisions: true })`) fills the zone
    in at runtime. If you want a click on the resulting banner to register as
-   a `loan.bannerClick` event, call `BankDataLayer.bannerClick(target)` from
+   a `bob.bannerClick` event, call `BankDataLayer.bannerClick(target)` from
    whatever markup Target actually renders in there — the helper function
    already exists in `datalayer.js`, ready for that.
 
