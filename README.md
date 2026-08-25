@@ -78,8 +78,11 @@ testing, before wiring up real Launch rules. Click the bar to open it.
   / `INSWEB######` / `INVWEB######` for the other 4) are client-generated
   placeholders — in production these come back from your backend after
   processing the submission, not the browser. See `MAPPING_GUIDE.md`.
-- No Adobe Launch embed script is active yet — each page has a commented-out
-  placeholder `<script>` tag (right after `js/datalayer.js`). Swap in the
-  real Elarix Launch property embed URL once one exists.
+- Every page currently loads the **BOB Cards** demo site's Adobe Launch
+  property (`launch-81122a58b9b9-development.min.js`), reused as a stand-in
+  since Elarix doesn't have its own Launch property yet. It's the same
+  Adobe sandbox/account, but its rules/data-element mappings are configured
+  for BOB Cards' schema, not this site's — swap in a real Elarix-specific
+  property embed URL once one exists.
 - Google Fonts (Sora/Inter/JetBrains Mono) require internet access to load;
   the site has system-font fallbacks if they don't load.
